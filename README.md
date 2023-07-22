@@ -5,5 +5,6 @@
 ```
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import RidgeCV, LassoCV, Ridge, Lasso #Loading the dataset
-reg = LassoCV() reg.fit(X, y)
+reg = LassoCV()
+reg.fit(X, y)
 ```
