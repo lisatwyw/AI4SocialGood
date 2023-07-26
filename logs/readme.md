@@ -7,7 +7,7 @@
 | 16 |  | Augmented | | 0.166-0.03 |
 | 15 | | Augmented | |  0.156-0.044 |
 | 14 | | 2-level ensemble |||
-| 13 | | XGB |||
+| 13 | | XGB |  0.780 (left out train) | 0.654 - 0.346|
 | 12 | | ||
 | 11 | 
 | 10 |
