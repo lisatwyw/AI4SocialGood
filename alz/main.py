@@ -1,5 +1,6 @@
 
 import numpy as np # linear algebra
+SEED=1
 np.random.seed(SEED)
 
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
@@ -168,8 +169,6 @@ if ( 'Files' in globals())==False:
 
 
 
-
-
 class DataGenerator(tf.keras.utils.Sequence):    
     def __init__(self, df, 
                  batch_size=64,
@@ -289,6 +288,7 @@ class DataGenerator(tf.keras.utils.Sequence):
     
     def __len__(self):
         return self.n // self.batch_size
+ 
      
 def get_model(  hp ):
     if 'conv1d' in hp['mid']:
