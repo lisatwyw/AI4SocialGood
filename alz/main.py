@@ -1,5 +1,6 @@
 
 import numpy as np # linear algebra
+
 SEED=1
 np.random.seed(SEED)
 
