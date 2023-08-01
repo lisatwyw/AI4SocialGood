@@ -29,13 +29,11 @@ from sklearn.linear_model import LassoCV
 from sklearn.metrics import average_precision_score, precision_recall_curve
 from scipy.stats import pearsonr
 
-def standard_data(X):
-    X2=X.copy()
-    for i in range(X.shape[1]):
-        scalers = StandardScaler()
-        X2[:, i, :] = scalers.fit_transform(X[:, i, :]) 
-    return X2
 
+ 
+import tensorflow as tf
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+tf.debugging.set_log_device_placement(False)
 
 def grab():
     #if ('trn_df' in globals() )==False:
