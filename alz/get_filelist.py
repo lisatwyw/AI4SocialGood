@@ -156,7 +156,12 @@ if ( 'Files' in globals())==False:
     t_ids = [ os.path.basename(g).split('.')[0] for g in Files ]
     id2files = { os.path.basename(g).split('.')[0]:g for g in Files }
 
-# https://medium.com/analytics-vidhya/write-your-own-custom-data-generator-for-tensorflow-keras-1252b64e41c3
+    px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
+
+
+
+
+
 
 trn,val,tst=0,1,2
 SEED=101
@@ -265,5 +270,6 @@ class DataGenerator(tf.keras.utils.Sequence):
     
     def __len__(self):
         return self.n // self.batch_size
-    
+
+
 
