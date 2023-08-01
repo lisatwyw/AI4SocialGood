@@ -1,9 +1,13 @@
+
+import numpy as np # linear algebra
+np.random.seed(SEED)
+
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import plotly.express as px
 import matplotlib.pyplot as plt
 import optuna
 from glob import glob
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-import plotly.express as px
+
 import os, sys #, csv
 import polars as pl
 from tqdm import tqdm
@@ -30,8 +34,12 @@ from sklearn.metrics import average_precision_score, precision_recall_curve
 from scipy.stats import pearsonr
 
 
+from tensorflow.keras.layers import Dense, Bidirectional, Flatten, LSTM, Conv1D, MaxPooling1D, RepeatVector
+from tensorflow.keras.layers import TimeDistributed, Input, GRU, Dropout, Masking 
+from tensorflow.keras.models import Model, load_model
  
 import tensorflow as tf
+
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 tf.debugging.set_log_device_placement(False)
 
@@ -162,10 +170,6 @@ if ( 'Files' in globals())==False:
 
 
 
-
-trn,val,tst=0,1,2
-SEED=101
-np.random.seed(SEED)
 class DataGenerator(tf.keras.utils.Sequence):    
     def __init__(self, df, 
                  batch_size=64,
@@ -192,10 +196,14 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.outcome = (df['sample_type'] != 'control').values.astype(int)
         self.gender = df['gender'] .values
         self.disease = df['disease'].values
+        self.age = df['age'] .values
 
-        self.task =task
-        self.nclasses=2         
+        Y = {'age': self.age,  'gender':self.gender, 'disease': self.outcome } 
+        
+        self.task = task
+        self.nclasses= len( np.unique( Y[task]) )         
         self.__shuffle()
+        self.shown=0
         
     def __shuffle(self):
         self.inds_by_class={}        
@@ -219,6 +227,15 @@ class DataGenerator(tf.keras.utils.Sequence):
         y_control= (self.df.loc[batches].sample_type.values != 'control').astype(int) # 0: control; 1: diseased
         y_gender = (self.df.loc[batches].gender.values == 'M').astype(int) #0: female; 1: male
         y_age = self.df.loc[batches].age.values
+        
+        if self.shown==0:
+            self.shown=1
+            print( 'Age samples:',y_age )
+            print( f'class A:{np.sum(y_control==0)}, class B:{np.sum(y_control==1)}' )
+            print( np.sum(y_gender==0), 'females',np.sum(y_gender==1), 'males',)
+            
+        y_gender = tf.keras.utils.to_categorical( y_gender )
+        y_control = tf.keras.utils.to_categorical( y_control )
         if self.ndims==3:
             X_batch = np.zeros((self.batch_size,696,696 ),dtype=float)
         else:
@@ -246,10 +263,12 @@ class DataGenerator(tf.keras.utils.Sequence):
         if 'age' in self.task:
             out = y_age[r]
         elif 'gender' in self.task:
-            out = y_gender[r]
+            out = y_gender[r] 
         elif 'disease' in self.task:
-            out = y_control[r]
-        return xx, out #{'regression':y_age[r], 'autoencoder':X_batch[r,] }
+            out = y_control[r] 
+        else:
+            out = {'regression':y_age[r], 'classify': y_control[r], 'classify2': y_gender[r] }
+        return xx, out #
                 
         #return X_batch[r,], {'classification':y_control, 'autoencoder':X_batch[r,] }
         #return X_batch[r,], {'control_class':y_control, 'gender_class': y_gender, 'age': y_age[r], 'autoencoder':X_batch[r,] }
@@ -270,6 +289,64 @@ class DataGenerator(tf.keras.utils.Sequence):
     
     def __len__(self):
         return self.n // self.batch_size
+     
+def get_model(  hp ):
+    if 'conv1d' in hp['mid']:
+        inputs = Input(shape=( hp['SEQLEN'], 1))
+        x = Conv1D( 64, 7, activation='gelu', padding='same')(inputs)
+        x = MaxPooling1D(2, padding='same')(x)
+        x = Dropout(.5)(x)
+        x = Conv1D( 32, 3, activation='gelu', padding='same')(x)
+        x = MaxPooling1D(2, padding='same')(x)
+        x = Conv1D( 16, 1, activation='gelu', padding='same')(x)
+        x = MaxPooling1D(2, padding='same')(x)
+        x = Flatten()(x)
+        x = Dense( 512, activation='gelu')(x)
+        x = Dropout(.5)(x)
+        x = Dense( 10, activation='gelu')(x)
+        x = Dropout(.5)(x)
+
+    elif 'sleep' in hp['mid']:
+        DO=hp['DO'] 
+        inputs = Input(shape=(SEQLEN, 1))
+        x = Conv1D( 64, 3, activation='relu', padding='same')(inputs)
+        x = Conv1D( 128, 3, activation='relu', padding='same')(x)
+        x = MaxPooling1D(2, padding='same')(x)
+        x = Conv1D( 128, 5, activation='relu', padding='same')(x)
+        x = Conv1D( 256, 5, activation='relu', padding='same')(x)
+        x = MaxPooling1D(2, padding='same')(x)
+        x = Dropout(DO)(x)
+        
+        if hp['lstm']==1:
+            x = LSTM( units=300, return_sequences=True)(x)
+            x = LSTM( units=300, return_sequences=True)(x)        
+            x = LSTM( units=300, return_sequences=False)(x)            
+        else:
+            x = Bidirectional(LSTM( units=300, return_sequences=True))(x)
+            x = Bidirectional(LSTM( units=300, return_sequences=True))(x)        
+            x = Bidirectional(LSTM( units=300, return_sequences=False))(x)
+        x = Dropout(DO/2)(x)
+        x = Flatten()(x)
+        
+
+    opt=tf.keras.optimizers.Adam( lr=.01 )    
+
+    if 'regress' in hp['task']:
+        out_name='regression'
+        pred = Dense(1, activation='linear', name=out_name)(x)
+        losses = {out_name: 'mse'}    
+        mon = 'val_mse'
+    else:
+        out_name='classify'
+        pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
+        losses = {out_name: 'binary_crossentropy',}
+        metrics ={out_name: 'accuracy'}
+        mon = 'val_accuracy'    
+
+    model = Model(inputs=inputs, outputs=pred)  
+    model.compile(loss=losses, metrics=losses, optimizer=opt )
+
+    return model, mon
 
 
 
