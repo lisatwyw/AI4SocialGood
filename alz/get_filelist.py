@@ -155,4 +155,115 @@ if ( 'Files' in globals())==False:
     print( len(Files) , 'avail train samples')
     t_ids = [ os.path.basename(g).split('.')[0] for g in Files ]
     id2files = { os.path.basename(g).split('.')[0]:g for g in Files }
+
+# https://medium.com/analytics-vidhya/write-your-own-custom-data-generator-for-tensorflow-keras-1252b64e41c3
+
+trn,val,tst=0,1,2
+SEED=101
+np.random.seed(SEED)
+class DataGenerator(tf.keras.utils.Sequence):    
+    def __init__(self, df, 
+                 batch_size=64,
+                 input_size=(5120,1),
+                 task = 'disease',
+                 shuffle=True):
+        
+        self.ndims=len( input_size )
+        self.seq_len = input_size[0] 
+        self.input_size = input_size
+        
+        self.df = df.copy()
+        self.t_ids = df.sample_id
+        
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        
+        self.n = len(self.t_ids)
+        
+        self.curr_segment=None
+        if self.ndims==2:
+            self.curr_segment=0
+            
+        self.outcome = (df['sample_type'] != 'control').values.astype(int)
+        self.gender = df['gender'] .values
+        self.disease = df['disease'].values
+
+        self.task =task
+        self.nclasses=2         
+        self.__shuffle()
+        
+    def __shuffle(self):
+        self.inds_by_class={}        
+        for c in range(self.nclasses):
+            s = np.where(self.outcome==c )[0]
+            r = np.random.permutation( len(s))            
+            self.inds_by_class[ c ] = s[r]
+            print(c, f'has {len( self.inds_by_class[ c ] )} samples')
+
+    def on_epoch_end(self):
+        if self.ndims==2:
+            self.curr_segment +=1
+            self.n_segments = NFEATS//self.seq_len
+        if self.shuffle:
+            self.__shuffle()
+        print(f'{self.curr_segment} of {self.n_segments} segment' )
+
+    def __get_data(self, batches):
+        
+        # Generates data containing batch_size samples
+        y_control= (self.df.loc[batches].sample_type.values != 'control').astype(int) # 0: control; 1: diseased
+        y_gender = (self.df.loc[batches].gender.values == 'M').astype(int) #0: female; 1: male
+        y_age = self.df.loc[batches].age.values
+        if self.ndims==3:
+            X_batch = np.zeros((self.batch_size,696,696 ),dtype=float)
+        else:
+            X_batch = np.zeros((self.batch_size, self.seq_len ),dtype=float)
+            
+        for i,f in enumerate(batches):
+            g = id2files[f]
+            x = pd.read_parquet( g ).fillna( 1 )[f].values
+            #print(x.shape, X_batch.shape )
+            if self.ndims==2:
+                xx= x[self.curr_segment*self.seq_len:(self.curr_segment+1)*self.seq_len ]
+                X_batch[i,:len(xx)] =xx
+            else:
+                X_batch[i,:] = np.reshape( x[:696*696], [696,696])
+            
+        r = np.random.permutation( len(batches) )            
+        
+        self.current_ids = batches[r].values.copy()
+                    
+        xx = X_batch[r,]
+        if self.ndims==2:
+            xx = np.expand_dims( xx, -1 )
+            #print(xx.shape,end=', ')
      
+        if 'age' in self.task:
+            out = y_age[r]
+        elif 'gender' in self.task:
+            out = y_gender[r]
+        elif 'disease' in self.task:
+            out = y_control[r]
+        return xx, out #{'regression':y_age[r], 'autoencoder':X_batch[r,] }
+                
+        #return X_batch[r,], {'classification':y_control, 'autoencoder':X_batch[r,] }
+        #return X_batch[r,], {'control_class':y_control, 'gender_class': y_gender, 'age': y_age[r], 'autoencoder':X_batch[r,] }
+    
+    def __getitem__(self, index):
+        half = self.batch_size//2
+        print(self.nclasses, half )
+        batches = np.empty(0)
+        for c in range( self.nclasses ):
+            nrounds = len(self.inds_by_class[ c ])//half
+            index = index % ( nrounds )            
+            s = self.inds_by_class[ c ][ index*half:(index+1)*half]
+            batches = np.hstack((batches, s)) 
+            
+        batches = self.t_ids[batches.astype(int)] 
+        X, y = self.__get_data(batches)        
+        return X, y
+    
+    def __len__(self):
+        return self.n // self.batch_size
+    
+
