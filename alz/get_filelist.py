@@ -39,11 +39,11 @@ def standard_data(X):
 
 def grab():
     #if ('trn_df' in globals() )==False:
-    bigfile='/kaggle/input/predict-alz/traindata.csv'
+    bigfile='../input/predict-alz/traindata.csv'
     trn_df = pl.read_csv(bigfile, has_header=True, n_rows=2 )
     display( trn_df.head())
 
-    bigfile='/kaggle/input/predict-alz/trainmap.csv'
+    bigfile='../input/predict-alz/trainmap.csv'
     trn_map = pd.read_csv(bigfile, )
 
     trn_map['id'] = trn_map.sample_id 
