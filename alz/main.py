@@ -216,7 +216,7 @@ class DataGenerator(tf.keras.utils.Sequence):
     def __init__(self, df, 
                  hp, id2files,
                  shuffle=True):
- 
+        self.hp=hp
         self.NFEATS = hp['NFEATS']; input_size = hp['input_size']
         self.ndims=len( input_size )
         self.seq_len = input_size[0] 
