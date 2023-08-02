@@ -385,11 +385,11 @@ def get_model(  hp ):
         losses = {out_name: 'mse'}; metrics = {out_name: ['mse', metric ]}
         mon = 'val_mse'
     else:
-        metric = tfa.metrics.F1Score(num_classes=3, name='f1_macro', average='macro', threshold=0.5)
+        #metric = tfa.metrics.F1Score(num_classes=3, name='f1_macro', average='macro', threshold=0.5)
         out_name='classify'
         pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
         losses = {out_name: 'binary_crossentropy',}
-        metrics= {out_name: [metric, 'binary_crossentropy'] }
+        metrics= {out_name: ['binary_crossentropy'] }
         mon = 'val_f1_macro'
      
     model = Model(inputs=inputs, outputs=pred)  
