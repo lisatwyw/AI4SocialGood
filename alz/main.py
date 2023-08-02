@@ -381,8 +381,8 @@ def get_model(  hp ):
     if 'age' in hp['task']:
         out_name='regression'
         pred = Dense(1, activation='linear', name=out_name)(x)
-        metric = tfa.metrics.r_square.RSquare()  
-        losses = {out_name: 'mse'}; metrics = {out_name: ['mse', metric ]}
+        #metric = tfa.metrics.r_square.RSquare()  
+        losses = {out_name: 'mse'}; metrics = {out_name: ['mse' ]}
         mon = 'val_mse'
     else:
         #metric = tfa.metrics.F1Score(num_classes=3, name='f1_macro', average='macro', threshold=0.5)
