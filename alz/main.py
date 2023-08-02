@@ -249,7 +249,8 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.__shuffle()
         self.shown=0
         self.id2files=id2files
-        
+        self.id_order=[]
+                  
     def __shuffle(self):
         self.inds_by_class={}        
         for c in range(self.nclasses):
