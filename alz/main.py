@@ -312,7 +312,7 @@ class DataGenerator(tf.keras.utils.Sequence):
     
     def __getitem__(self, index):
         half = self.batch_size//2
-        print(self.nclasses, half )
+        # print(self.nclasses, half )
         batches = np.empty(0)
         for c in range( self.nclasses ):
             nrounds = len(self.inds_by_class[ c ])//half
@@ -379,7 +379,7 @@ def get_model(  hp ):
         out_name='classify'
         pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
         losses = {out_name: 'binary_crossentropy',}
-        metrics ={out_name: metric }
+        metrics ={out_name: [metric, 'binary_crossentropy'] }
         mon = 'val_f1_macro'
      
     model = Model(inputs=inputs, outputs=pred)  
