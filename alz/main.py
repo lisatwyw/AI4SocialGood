@@ -254,10 +254,17 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.inds_by_class={}        
         for c in range(self.nclasses):
             s = np.where(self.outcome==c )[0]
-            r = np.random.permutation( len(s))            
-            self.inds_by_class[ c ] = s[r]
+
+            if self.shuffle:
+                r = np.random.permutation( len(s))            
+                self.inds_by_class[ c ] = s[r]
+            else:
+                self.inds_by_class[ c ] = s 
             print(c, f'has {len( self.inds_by_class[ c ] )} samples')
 
+    def on_epoch_start(self):
+        self.id_order=[]
+     
     def on_epoch_end(self):
         if self.ndims==2:
             self.curr_segment +=1
@@ -275,8 +282,8 @@ class DataGenerator(tf.keras.utils.Sequence):
         
         if self.shown==0:
             #self.shown=1
-            print( '\nAge samples:',y_age[::2] )
-            print( f'class A:{np.sum(y_control==0)}, class B:{np.sum(y_control==1)}' )
+            print( '\nAge samples:',y_age[::(len(y_age)//2)], end=' |' )
+            print( f'class A:{np.sum(y_control==0)}, class B:{np.sum(y_control==1)}',end=' | ' )
             print( np.sum(y_gender==0), 'females',np.sum(y_gender==1), 'males',)
             
         y_gender = tf.keras.utils.to_categorical( y_gender )
@@ -295,11 +302,10 @@ class DataGenerator(tf.keras.utils.Sequence):
                 X_batch[i,:len(xx)] =xx
             else:
                 X_batch[i,:] = np.reshape( x[:696*696], [696,696])
-            
+        
         r = np.random.permutation( len(batches) )            
         
-        self.current_ids = batches[r].values.copy()
-                    
+        self.current_ids = batches[r].values.copy(); self.id_order.append(  batches[r].values.copy() )
         xx = X_batch[r,]
         if self.ndims==2:
             xx = np.expand_dims( xx, -1 )
