@@ -242,7 +242,9 @@ class DataGenerator(tf.keras.utils.Sequence):
         Y = {'age': self.age,  'gender':self.gender, 'disease': self.outcome } 
         
         self.task = hp['task']
-        self.nclasses= len( np.unique( Y[self.task]) )         
+        self.nclasses= 2 # each batch will have equal number of this grp 
+        #len( np.unique( Y[self.task]) )     
+                  
         self.__shuffle()
         self.shown=0
         self.id2files=id2files
