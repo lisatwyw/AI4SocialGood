@@ -19,6 +19,7 @@ from torchmetrics.classification import MultilabelF1Score, MultilabelAccuracy
 import tensorflow_datasets as tfds
 import tensorflow as tf
 
+import sklearn
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import QuantileTransformer
 from sklearn.metrics import matthews_corrcoef
@@ -384,5 +385,17 @@ def get_model(  hp ):
 
     return model, mon, losses, metrics
 
+
+def plot_roc(name, labels, predictions, **kwargs):
+    fp, tp, _ = sklearn.metrics.roc_curve(labels, predictions)
+
+    plt.plot(100*fp, 100*tp, label=name, linewidth=2, **kwargs)
+    plt.xlabel('False positives [%]')
+    plt.ylabel('True positives [%]')
+    plt.xlim([-0.5,20])
+    plt.ylim([80,100.5])
+    plt.grid(True)
+    ax = plt.gca()
+    ax.set_aspect('equal')
 
 
