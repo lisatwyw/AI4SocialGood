@@ -376,8 +376,8 @@ def get_model(  hp ):
         out_name='classify'
         pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
         losses = {out_name: 'binary_crossentropy',}
-        metrics ={out_name: tf.keras.metrics.F1Score( average='macro', name='f1_score', dtype=None) }
-        mon = 'val_macro';  
+        metrics ={out_name: tf.keras.metrics.F1Score( average='macro', name='f1_macro', dtype=None) }
+        mon = 'val_f1_macro';  
      
     model = Model(inputs=inputs, outputs=pred)  
     model.compile(loss=losses, metrics=losses, optimizer=opt )
