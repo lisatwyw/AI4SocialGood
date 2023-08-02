@@ -131,7 +131,7 @@ def get_filelist():
     name += ['control9']
     dirs += [ '../input/meth-control-9of50/train/control/*.*' ] 
     
-    for d in range(10,21):
+    for d in range(10,21,2):
         name += ['control%d' %d]
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
 
@@ -338,20 +338,21 @@ class DataGenerator(tf.keras.utils.Sequence):
  
      
 def get_model(  hp ):
-    if 'conv1d' in hp['mid']:
+    DO=hp['DO'] 
+    if 'conv1d' in hp['mid']:     
         inputs = Input(shape=( hp['SEQLEN'], 1))
-        x = Conv1D( 64, 7, activation='gelu', padding='same')(inputs)
+        x = Conv1D( 64, 3, activation='gelu', padding='same')(inputs)
         x = MaxPooling1D(2, padding='same')(x)
-        x = Dropout(.5)(x)
-        x = Conv1D( 32, 3, activation='gelu', padding='same')(x)
+        x = Dropout(DO)(x)
+        x = Conv1D( 64, 5, activation='gelu', padding='same')(x)
         x = MaxPooling1D(2, padding='same')(x)
-        x = Conv1D( 16, 1, activation='gelu', padding='same')(x)
+        x = Conv1D( 64, 7, activation='gelu', padding='same')(x)
         x = MaxPooling1D(2, padding='same')(x)
         x = Flatten()(x)
         x = Dense( 512, activation='gelu')(x)
-        x = Dropout(.5)(x)
+        x = Dropout(DO/2)(x)
         x = Dense( 10, activation='gelu')(x)
-        x = Dropout(.5)(x)
+        x = Dropout(DO/3)(x)
 
     elif 'sleep' in hp['mid']:
         DO=hp['DO'] 
@@ -373,8 +374,7 @@ def get_model(  hp ):
             x = Bidirectional(LSTM( units=300, return_sequences=True))(x)        
             x = Bidirectional(LSTM( units=300, return_sequences=False))(x)
         x = Dropout(DO/2)(x)
-        x = Flatten()(x)
-        
+        x = Flatten()(x)        
 
     opt=tf.keras.optimizers.Adam( lr=.01 )    
 
