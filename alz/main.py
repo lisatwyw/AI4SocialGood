@@ -18,7 +18,7 @@ from torchmetrics.classification import MultilabelF1Score, MultilabelAccuracy
  
 import tensorflow_datasets as tfds
 import tensorflow as tf
-import tensorflow_addons as tfa
+#import tensorflow_addons as tfa
 
 import sklearn
 from sklearn.preprocessing import StandardScaler
