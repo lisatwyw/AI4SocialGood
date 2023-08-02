@@ -170,11 +170,11 @@ def get_filelist():
         Files+=files
     print( len(Files) , 'avail train samples')
     t_ids = [ os.path.basename(g).split('.')[0] for g in Files ]
-    id2files = { os.path.basename(g).split('.')[0]:g for g in Files }
+    id2file = { os.path.basename(g).split('.')[0]:g for g in Files }
 
     fig =px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
     fig.show()
-    return Files, t_ids, id2files
+    return Files, t_ids, id2file
 
 # ================== evaluation code snippet provided by University 
 def evaluate_ml(y_true, y_pred, sample_type):
@@ -215,7 +215,7 @@ def evaluate_ml(y_true, y_pred, sample_type):
 # ================== data generators ==================
 class DataGenerator(tf.keras.utils.Sequence):    
     def __init__(self, df, 
-                 hp, id2files,
+                 hp, id2file,
                  shuffle=True):
         self.hp=hp
         self.NFEATS = hp['NFEATS']; input_size = hp['input_size']
@@ -248,7 +248,7 @@ class DataGenerator(tf.keras.utils.Sequence):
                   
         self.__shuffle()
         self.shown=0
-        self.id2files=id2files
+        self.id2file=id2file
         self.id_order=[]
                   
     def __shuffle(self):
@@ -295,7 +295,7 @@ class DataGenerator(tf.keras.utils.Sequence):
             X_batch = np.zeros((self.batch_size, self.seq_len), dtype=float)
             
         for i,f in enumerate(batches):
-            g = self.id2files[f]
+            g = self.id2file[f]
             x = pd.read_parquet( g ).fillna( 1 )[f].values
             #print(x.shape, X_batch.shape )
             if self.ndims==2:
