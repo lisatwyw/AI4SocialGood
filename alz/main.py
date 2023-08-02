@@ -208,15 +208,18 @@ def evaluate_ml(y_true, y_pred, sample_type):
     mae = np.mean([mae_control, mae_case])
     return mae, mae_control, mae_case
 
-
+'''
+batch_size=64,
+                 input_size=(5120,1),
+                 task = 'disease'
+'''                 
 
 class DataGenerator(tf.keras.utils.Sequence):    
     def __init__(self, df, 
-                 batch_size=64,
-                 input_size=(5120,1),
-                 task = 'disease',
+                 hp, id2files,
                  shuffle=True):
-        
+ 
+        self.NFEATS = hp['NFEATS']; input_size = hp['input_size']
         self.ndims=len( input_size )
         self.seq_len = input_size[0] 
         self.input_size = input_size
@@ -224,7 +227,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.df = df.copy()
         self.t_ids = df.sample_id
         
-        self.batch_size = batch_size
+        self.batch_size = hp['BS']
         self.shuffle = shuffle
         
         self.n = len(self.t_ids)
@@ -240,7 +243,7 @@ class DataGenerator(tf.keras.utils.Sequence):
 
         Y = {'age': self.age,  'gender':self.gender, 'disease': self.outcome } 
         
-        self.task = task
+        self.task = hp['task']
         self.nclasses= len( np.unique( Y[task]) )         
         self.__shuffle()
         self.shown=0
@@ -256,7 +259,7 @@ class DataGenerator(tf.keras.utils.Sequence):
     def on_epoch_end(self):
         if self.ndims==2:
             self.curr_segment +=1
-            self.n_segments = NFEATS//self.seq_len
+            self.n_segments = self.NFEATS//self.seq_len
         if self.shuffle:
             self.__shuffle()
         print(f'{self.curr_segment} of {self.n_segments} segment' )
@@ -277,9 +280,9 @@ class DataGenerator(tf.keras.utils.Sequence):
         y_gender = tf.keras.utils.to_categorical( y_gender )
         y_control = tf.keras.utils.to_categorical( y_control )
         if self.ndims==3:
-            X_batch = np.zeros((self.batch_size,696,696 ),dtype=float)
+            X_batch = np.zeros((self.batch_size, 696, 696), dtype=float)
         else:
-            X_batch = np.zeros((self.batch_size, self.seq_len ),dtype=float)
+            X_batch = np.zeros((self.batch_size, self.seq_len), dtype=float)
             
         for i,f in enumerate(batches):
             g = id2files[f]
