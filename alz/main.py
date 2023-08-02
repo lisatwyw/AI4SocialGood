@@ -261,7 +261,7 @@ class DataGenerator(tf.keras.utils.Sequence):
                 self.inds_by_class[ c ] = s[r]
             else:
                 self.inds_by_class[ c ] = s 
-            print(c, f'has {len( self.inds_by_class[ c ] )} samples')
+            print(c, f'has {len( self.inds_by_class[ c ] )} samples', end=' | ')
 
     def on_epoch_start(self):
         self.id_order=[]
@@ -272,7 +272,7 @@ class DataGenerator(tf.keras.utils.Sequence):
             self.n_segments = self.NFEATS//self.seq_len
         if self.shuffle:
             self.__shuffle()
-        print(f'{self.curr_segment} of {self.n_segments} segment' )
+        print(f'{self.curr_segment} of {self.n_segments} segment', )
 
     def __get_data(self, batches):
         
@@ -283,7 +283,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         
         if self.shown==0:
             #self.shown=1
-            print( '\nAge samples:',y_age[::(len(y_age)//2)], end=' |' )
+            print( 'Age samples:',y_age[::(len(y_age)//2)], end=' |' )
             print( f'class A:{np.sum(y_control==0)}, class B:{np.sum(y_control==1)}',end=' | ' )
             print( np.sum(y_gender==0), 'females',np.sum(y_gender==1), 'males',)
             
