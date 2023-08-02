@@ -171,7 +171,7 @@ def get_filelist():
 
     px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
 
-    return Files, t_ids
+    return Files, t_ids, id2files
 
 # evaluation code snippet provided by University 
 def evaluate_ml(y_true, y_pred, sample_type):
