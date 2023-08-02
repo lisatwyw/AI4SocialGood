@@ -104,7 +104,7 @@ if ('train_map' in globals())==False:
 if ( 'Files' in globals())==False:   
     NFEATS = 485512
     def read_chunk(files, trn_map):
-        print( len(files), files[0] )
+        # print( len(files), files[0] )
         Ages,Ids = [],[]
         A = np.zeros( (len(files), NFEATS) )
         for i,g in enumerate( files ):
