@@ -245,6 +245,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.nclasses= len( np.unique( Y[task]) )         
         self.__shuffle()
         self.shown=0
+        self.id2files=id2files
         
     def __shuffle(self):
         self.inds_by_class={}        
@@ -283,7 +284,7 @@ class DataGenerator(tf.keras.utils.Sequence):
             X_batch = np.zeros((self.batch_size, self.seq_len), dtype=float)
             
         for i,f in enumerate(batches):
-            g = id2files[f]
+            g = self.id2files[f]
             x = pd.read_parquet( g ).fillna( 1 )[f].values
             #print(x.shape, X_batch.shape )
             if self.ndims==2:
