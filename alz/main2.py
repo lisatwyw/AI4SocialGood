@@ -168,6 +168,42 @@ if ( 'Files' in globals())==False:
     px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
 
 
+# evaluation code snippet provided by University 
+def evaluate_ml(y_true, y_pred, sample_type):
+    '''
+    This function is used to evaluate the performance of the model. 
+
+    Parameters:
+    ------------
+    y_true: true age
+    y_pred: predicted age
+    sample_type: sample type, 0 for control, 1 for case
+    
+    Return:
+    ------------
+    mae: mean absolute error.
+    mae_control: mean absolute error of control samples.
+    mae_case: mean absolute error of case samples.
+
+    We use MAE to evaluate the performance.
+    Please refer to evaluation section in the the official website for more details.
+    '''
+    mae_control = np.mean(
+        np.abs(y_true[sample_type == 0] - y_pred[sample_type == 0]))
+
+    case_true = y_true[sample_type == 1]
+    case_pred = y_pred[sample_type == 1]
+    above = np.where(case_pred >= case_true)
+    below = np.where(case_pred < case_true)
+
+    ae_above = np.sum(np.abs(case_true[above] - case_pred[above])) / 2
+    ae_below = np.sum(np.abs(case_true[below] - case_pred[below]))
+    mae_case = (ae_above + ae_below) / len(case_true)
+
+    mae = np.mean([mae_control, mae_case])
+    return mae, mae_control, mae_case
+
+
 
 class DataGenerator(tf.keras.utils.Sequence):    
     def __init__(self, df, 
