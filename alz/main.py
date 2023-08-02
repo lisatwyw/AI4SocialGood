@@ -47,6 +47,9 @@ tf.debugging.set_log_device_placement(False)
 
 import matplotlib.pyplot as plt
 
+
+
+# ================== Problem specific admin ==================
 def grab():
     #if ('trn_df' in globals() )==False:
     bigfile='../input/predict-alz/traindata.csv'
@@ -173,7 +176,7 @@ def get_filelist():
     fig.show()
     return Files, t_ids, id2files
 
-# evaluation code snippet provided by University 
+# ================== evaluation code snippet provided by University 
 def evaluate_ml(y_true, y_pred, sample_type):
     '''
     This function is used to evaluate the performance of the model. 
@@ -208,12 +211,8 @@ def evaluate_ml(y_true, y_pred, sample_type):
     mae = np.mean([mae_control, mae_case])
     return mae, mae_control, mae_case
 
-'''
-batch_size=64,
-                 input_size=(5120,1),
-                 task = 'disease'
-'''                 
-
+         
+# ================== data generators ==================
 class DataGenerator(tf.keras.utils.Sequence):    
     def __init__(self, df, 
                  hp, id2files,
@@ -335,8 +334,27 @@ class DataGenerator(tf.keras.utils.Sequence):
     
     def __len__(self):
         return self.n // self.batch_size
- 
-     
+
+
+
+# ================== trainning  metrics ==================
+def get_f1(y_true, y_pred): #taken from old keras source code
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    recall = true_positives / (possible_positives + K.epsilon())
+    f1_val = 2*(precision*recall)/(precision+recall+K.epsilon())
+    return f1_val
+
+def get_f1macro(y_true, y_pred): #taken from old keras source code
+    #print( y_true , y_pred  )
+    f1_val = tf.keras.metrics.F1Score(average='macro',name='f1_score',)( y_true, y_pred )
+    return f1_val
+
+
+
+# ================== model defns ==================
 def get_model(  hp ):
     DO=hp['DO'] 
     if 'conv1d' in hp['mid']:     
@@ -395,7 +413,7 @@ def get_model(  hp ):
     model.compile( loss=losses, metrics=metrics, optimizer=opt, run_eagerly=True, )
     return model, mon, losses, metrics
 
-
+# ================== utils ==================
 def plot_roc(name, labels, predictions, **kwargs):
     fp, tp, _ = sklearn.metrics.roc_curve(labels, predictions)
 
