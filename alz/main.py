@@ -135,6 +135,8 @@ def get_filelist():
         name += ['control%d' %d]
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
 
+    name +=['alz0']
+    dirs +=['../input/ad-con-park-frst60/train/alz/*.*']
     name +=['alz1']
     dirs +=['../input/predict-proc-alz/train/alzh/*.*']
     name +=['alz4']
