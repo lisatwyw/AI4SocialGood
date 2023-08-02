@@ -73,8 +73,7 @@ def grab():
 
     d_key=trn_map.disease.unique()[0]
     alz_inds = np.where(trn_map.disease == d_key )[0]
-    
-    
+    '''
     plt.hist( trn_map.age[ np.intersect1d( control_inds, f_inds) ], label=c_key+' female')
     plt.hist( trn_map.age[ np.intersect1d( control_inds, m_inds) ], label=c_key+' male')
     plt.legend(); plt.show()
@@ -86,9 +85,8 @@ def grab():
     plt.hist( trn_map.age[ np.intersect1d( alz_inds, f_inds) ], label=d_key+' female')
     plt.hist( trn_map.age[ np.intersect1d( alz_inds, m_inds) ], label=d_key+' male')
     plt.legend(); plt.show()
-    
-    fig = px.histogram( trn_map, 'disease')
-    fig.show()
+    '''
+
     
     Ds=list(sorted(trn_map.disease.unique()))
     Ds.remove('control')
@@ -169,8 +167,8 @@ def get_filelist():
     t_ids = [ os.path.basename(g).split('.')[0] for g in Files ]
     id2files = { os.path.basename(g).split('.')[0]:g for g in Files }
 
-    px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
-
+    fig =px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
+    fig.show()
     return Files, t_ids, id2files
 
 # evaluation code snippet provided by University 
