@@ -18,6 +18,7 @@ from torchmetrics.classification import MultilabelF1Score, MultilabelAccuracy
  
 import tensorflow_datasets as tfds
 import tensorflow as tf
+import tensorflow_addons as tfa
 
 import sklearn
 from sklearn.preprocessing import StandardScaler
@@ -374,10 +375,14 @@ def get_model(  hp ):
         losses = {out_name: 'mse'}    
         mon = 'val_mse'
     else:
+     
+ 
+        metric = tfa.metrics.F1Score(num_classes=3, name='f1_macro', average='macro', threshold=0.5)
+
         out_name='classify'
         pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
         losses = {out_name: 'binary_crossentropy',}
-        metrics ={out_name: tf.keras.metrics.F1Score( average='macro', name='f1_macro', dtype=None) }
+        metrics ={out_name: metric }
         mon = 'val_f1_macro';  
      
     model = Model(inputs=inputs, outputs=pred)  
