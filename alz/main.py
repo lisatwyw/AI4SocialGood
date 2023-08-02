@@ -276,7 +276,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         
         if self.shown==0:
             #self.shown=1
-            print( 'Age samples:',y_age )
+            print( '\nAge samples:',y_age[::2] )
             print( f'class A:{np.sum(y_control==0)}, class B:{np.sum(y_control==1)}' )
             print( np.sum(y_gender==0), 'females',np.sum(y_gender==1), 'males',)
             
@@ -381,20 +381,18 @@ def get_model(  hp ):
     if 'age' in hp['task']:
         out_name='regression'
         pred = Dense(1, activation='linear', name=out_name)(x)
-        #metric = tfa.metrics.r_square.RSquare()  
-        losses = {out_name: 'mse'}; metrics = {out_name: ['mse' ]}
-        mon = 'val_mse'
+        losses = {out_name: 'mse'}; metrics ['mse'] #= {out_name: ['mse' ]}
+        mon = 'mse'
     else:
-        #metric = tfa.metrics.F1Score(num_classes=3, name='f1_macro', average='macro', threshold=0.5)
         out_name='classify'
         pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
         losses = {out_name: 'binary_crossentropy',}
-        metrics= {out_name: ['binary_crossentropy'] }
-        mon = 'val_f1_macro'
+        metrics= ['binary_crossentropy', get_f1macro]
+        mon = 'f1_macro'
      
     model = Model(inputs=inputs, outputs=pred)  
-    model.compile(loss=losses, metrics=losses, optimizer=opt )
-
+    #model.compile(loss=losses, metrics=metrics, optimizer=opt )
+    model.compile( loss=losses, metrics=metrics, optimizer=opt, run_eagerly=True, )
     return model, mon, losses, metrics
 
 
