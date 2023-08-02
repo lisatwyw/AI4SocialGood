@@ -379,14 +379,14 @@ def get_model(  hp ):
     if 'age' in hp['task']:
         out_name='regression'
         pred = Dense(1, activation='linear', name=out_name)(x)
-        losses = {out_name: 'mse'}    
+        losses = {out_name: 'mse'}; metrics = {out_name: 'mse'}
         mon = 'val_mse'
     else:
         metric = tfa.metrics.F1Score(num_classes=3, name='f1_macro', average='macro', threshold=0.5)
         out_name='classify'
         pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
         losses = {out_name: 'binary_crossentropy',}
-        metrics ={out_name: [metric, 'binary_crossentropy'] }
+        metrics= {out_name: [metric, 'binary_crossentropy'] }
         mon = 'val_f1_macro'
      
     model = Model(inputs=inputs, outputs=pred)  
