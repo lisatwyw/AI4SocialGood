@@ -275,7 +275,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         y_age = self.df.loc[batches].age.values
         
         if self.shown==0:
-            self.shown=1
+            #self.shown=1
             print( 'Age samples:',y_age )
             print( f'class A:{np.sum(y_control==0)}, class B:{np.sum(y_control==1)}' )
             print( np.sum(y_gender==0), 'females',np.sum(y_gender==1), 'males',)
