@@ -369,21 +369,18 @@ def get_model(  hp ):
 
     opt=tf.keras.optimizers.Adam( lr=.01 )    
 
-    if 'regress' in hp['task']:
+    if 'age' in hp['task']:
         out_name='regression'
         pred = Dense(1, activation='linear', name=out_name)(x)
         losses = {out_name: 'mse'}    
         mon = 'val_mse'
     else:
-     
- 
         metric = tfa.metrics.F1Score(num_classes=3, name='f1_macro', average='macro', threshold=0.5)
-
         out_name='classify'
         pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
         losses = {out_name: 'binary_crossentropy',}
         metrics ={out_name: metric }
-        mon = 'val_f1_macro';  
+        mon = 'val_f1_macro'
      
     model = Model(inputs=inputs, outputs=pred)  
     model.compile(loss=losses, metrics=losses, optimizer=opt )
