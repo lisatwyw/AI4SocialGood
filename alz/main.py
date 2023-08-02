@@ -42,9 +42,10 @@ from tensorflow.keras.layers import TimeDistributed, Input, GRU, Dropout, Maskin
 from tensorflow.keras.models import Model, load_model
  
 import tensorflow as tf
-
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 tf.debugging.set_log_device_placement(False)
+
+import matplotlib.pyplot as plt
 
 def grab():
     #if ('trn_df' in globals() )==False:
@@ -73,7 +74,7 @@ def grab():
     d_key=trn_map.disease.unique()[0]
     alz_inds = np.where(trn_map.disease == d_key )[0]
     
-    import matplotlib.pyplot as plt
+    
     plt.hist( trn_map.age[ np.intersect1d( control_inds, f_inds) ], label=c_key+' female')
     plt.hist( trn_map.age[ np.intersect1d( control_inds, m_inds) ], label=c_key+' male')
     plt.legend(); plt.show()
@@ -98,10 +99,10 @@ def grab():
     return trn_df.columns, trn_map, d_key, D
 
 if ('train_map' in globals())==False:
+    NFEATS = 485512
     train_ids, trn_map, d_key, disease_codes = grab()
     print(trn_map.disease.unique(),  len(trn_map.age.unique() ), '# of unique age values' )
 
-NFEATS = 485512
 
 def get_filelist():       
     def read_chunk(files, trn_map):
