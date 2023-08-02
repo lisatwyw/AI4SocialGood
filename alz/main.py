@@ -134,7 +134,7 @@ def get_filelist():
     name += ['control9']
     dirs += [ '../input/meth-control-9of50/train/control/*.*' ] 
     
-    for d in range(10,21,2):
+    for d in range(10,25,2):
         name += ['control%d' %d]
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
 
@@ -148,6 +148,8 @@ def get_filelist():
     dirs +=['../input/meth-ad-240-480/train/alzh/*.*'] 
     name +=['alz3']
     dirs +=['../input/meth-ad-780/train/alzh/*.*' ]
+    name +=['alz5']
+    dirs +=['../input/predict-proc-alz-last/train/alzh/*.*' ]
     
     name +=[ 'grav']
     dirs +=['../input/predict-grav/train/grav/*.*']
