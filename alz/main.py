@@ -100,9 +100,10 @@ def grab():
 if ('train_map' in globals())==False:
     train_ids, trn_map, d_key, disease_codes = grab()
     print(trn_map.disease.unique(),  len(trn_map.age.unique() ), '# of unique age values' )
-      
-if ( 'Files' in globals())==False:   
-    NFEATS = 485512
+
+NFEATS = 485512
+
+def get_filelist():       
     def read_chunk(files, trn_map):
         # print( len(files), files[0] )
         Ages,Ids = [],[]
@@ -169,6 +170,7 @@ if ( 'Files' in globals())==False:
 
     px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
 
+    return Files, t_ids
 
 # evaluation code snippet provided by University 
 def evaluate_ml(y_true, y_pred, sample_type):
