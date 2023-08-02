@@ -408,7 +408,7 @@ def get_model(  hp ):
     if 'age' in hp['task']:
         out_name='regression'
         pred = Dense(1, activation='linear', name=out_name)(x)
-        losses = {out_name: 'mse'}; metrics ['mse'] #= {out_name: ['mse' ]}
+        losses = {out_name: 'mse'}; metrics=['mse'] #= {out_name: ['mse' ]}
         mon = 'mse'
     else:
         out_name='classify'
