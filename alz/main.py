@@ -91,13 +91,14 @@ def grab():
     Ds.remove('control')
     D={ d:(1+i) for i,d in enumerate( Ds) }
     D['control']=0
-
+    C2D = {(1+i):d for i,d in enumerate(Ds) }
+    C2D[0]='control'
     trn_map.disease.replace( D, inplace=True )
-    return trn_df.columns, trn_map, d_key, D
+    return trn_df.columns, trn_map, d_key, D, C2D
 
 if ('train_map' in globals())==False:
     NFEATS = 485512
-    train_ids, trn_map, d_key, disease_codes = grab()
+    train_ids, trn_map, d_key, disease2code, code2disease = grab()
     print(trn_map.disease.unique(),  len(trn_map.age.unique() ), '# of unique age values' )
 
 
