@@ -114,7 +114,7 @@ def get_filelist():
         return np.array(Ages).squeeze(), np.array(Ids).squeeze(), A
      
     name = ['control9']
-    dirs = [ '../input/meth-control-9of50/train/control/*.*' ] 
+    dirs = ['../input/meth-control-9of50/train/control/*.*' ] 
     
     for d in range(1,9,2):
         name += ['control%d' %d]
@@ -125,7 +125,7 @@ def get_filelist():
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
 
     name += ['control14a']
-    dirs += [ '..//input/predict-control-bk0of14/train/control/*.*' ] 
+    dirs += ['..//input/predict-control-bk0of14/train/control/*.*' ] 
 
     name +=['alz0']
     dirs +=['../input/ad-con-park-frst60/train/alz/*.*']
@@ -140,10 +140,10 @@ def get_filelist():
     name +=['alz5']
     dirs +=['../input/predict-proc-alz-last/train/alzh/*.*' ]
     
-    name +=[ 'grav']
+    name +=['grav']
     dirs +=['../input/predict-grav/train/grav/*.*']
     
-    name +=[ 'park']
+    name +=['park']
     dirs +=['../input/ad-con-park-frst60/train/park/*.*']
     name +=[ 'park1']
     dirs +=['../input/predict-park/train/park/*.*'] 
@@ -156,8 +156,8 @@ def get_filelist():
     dirs +=['../input/predict-%s/train/%s/*.*'%('hunt','hunt')]
 
  
-    name = ['sjog']
-    dirs = ['../input/meth-sjog/sjog/kaggle/working/train/sjog/*.*']
+    name += ['sjog']
+    dirs += ['../input/meth-sjog/sjog/kaggle/working/train/sjog/*.*']
     name += ['stroke']
     dirs += ['../input/meth-sjog/stroke/kaggle/working/train/stroke/*.*']
     
