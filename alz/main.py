@@ -175,9 +175,9 @@ def get_filelist():
     id2file = { os.path.basename(g).split('.')[0]:g for g in Files }
 
     t_ids = np.unique(t_ids)
- 
-    fig =px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
-    fig.show()
+    if len(t_ids)>0:
+        fig =px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
+        fig.show()
     print( len(t_ids), 'avail train samples')
     return Files, t_ids, id2file
 
