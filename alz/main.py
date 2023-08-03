@@ -47,8 +47,6 @@ tf.debugging.set_log_device_placement(False)
 
 import matplotlib.pyplot as plt
 
-
-
 # ================== Problem specific admin ==================
 def grab():
     #if ('trn_df' in globals() )==False:
@@ -88,9 +86,7 @@ def grab():
     plt.hist( trn_map.age[ np.intersect1d( alz_inds, f_inds) ], label=d_key+' female')
     plt.hist( trn_map.age[ np.intersect1d( alz_inds, m_inds) ], label=d_key+' male')
     plt.legend(); plt.show()
-    '''
-
-    
+    '''    
     Ds=list(sorted(trn_map.disease.unique()))
     Ds.remove('control')
     D={ d:(1+i) for i,d in enumerate( Ds) }
@@ -117,16 +113,6 @@ def get_filelist():
             A[i,:] = pl.read_parquet( g )[f]
         return np.array(Ages).squeeze(), np.array(Ids).squeeze(), A
     
-    name = ['sjog']
-    dirs = ['../input/meth-sjog/sjog/kaggle/working/train/sjog/*.*']
-    name += ['stroke']
-    dirs += ['../input/meth-sjog/stroke/kaggle/working/train/stroke/*.*']
-    
-    name += ['schi0']
-    dirs += ['../input/predict-schi-bk0of2/train/schi/*.*']
-    name += ['schi']
-    dirs += ['../input/predict-schi-bk1of2/train/schi/*.*']
-
     for d in range(1,9,2):
         name += ['control%d' %d]
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
@@ -134,9 +120,12 @@ def get_filelist():
     name += ['control9']
     dirs += [ '../input/meth-control-9of50/train/control/*.*' ] 
     
-    for d in range(10,25,2):
+    for d in range(10,29,2):
         name += ['control%d' %d]
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
+
+    name += ['control14a']
+    dirs += [ '..//input/predict-control-bk0of14/train/control/*.*' ] 
 
     name +=['alz0']
     dirs +=['../input/ad-con-park-frst60/train/alz/*.*']
@@ -166,16 +155,29 @@ def get_filelist():
     dirs +=['../input/predict-%s/train/%s/*.*'%('rheu','rheu')]
     dirs +=['../input/predict-%s/train/%s/*.*'%('hunt','hunt')]
 
+ 
+    name = ['sjog']
+    dirs = ['../input/meth-sjog/sjog/kaggle/working/train/sjog/*.*']
+    name += ['stroke']
+    dirs += ['../input/meth-sjog/stroke/kaggle/working/train/stroke/*.*']
+    
+    name += ['schi0']
+    dirs += ['../input/predict-schi-bk0of2/train/schi/*.*']
+    name += ['schi']
+    dirs += ['../input/predict-schi-bk1of2/train/schi/*.*']
+ 
     Files=[]
     for dr in dirs:    
         files = glob( dr )
         Files+=files
-    print( len(Files) , 'avail train samples')
     t_ids = [ os.path.basename(g).split('.')[0] for g in Files ]
     id2file = { os.path.basename(g).split('.')[0]:g for g in Files }
 
+    t_ids = np.unique(t_ids)
+ 
     fig =px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
     fig.show()
+    print( len(t_ids), 'avail train samples')
     return Files, t_ids, id2file
 
 # ================== evaluation code snippet provided by University 
