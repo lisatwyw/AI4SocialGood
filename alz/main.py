@@ -112,13 +112,13 @@ def get_filelist():
             Ages.append(trn_map.age[ np.where( trn_map.sample_id == f)[0]  ].values )
             A[i,:] = pl.read_parquet( g )[f]
         return np.array(Ages).squeeze(), np.array(Ids).squeeze(), A
+     
+    name = ['control9']
+    dirs = [ '../input/meth-control-9of50/train/control/*.*' ] 
     
     for d in range(1,9,2):
         name += ['control%d' %d]
-        dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
-        
-    name += ['control9']
-    dirs += [ '../input/meth-control-9of50/train/control/*.*' ] 
+        dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]  
     
     for d in range(10,29,2):
         name += ['control%d' %d]
