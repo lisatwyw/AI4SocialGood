@@ -1,14 +1,10 @@
 
 
-
+'''
+X = [tokens+([0]* (max_tokens-len(tokens))) if len(tokens)<max_tokens else tokens[:max_tokens] for tokens in X] ## Bringing all samples to max_tokens length.
+'''
 
 from tensorflow.keras import backend as K
-
-
-
-
-
-
 
 
 ### Define F1 measures: F1 = 2 * (precision * recall) / (precision + recall)
