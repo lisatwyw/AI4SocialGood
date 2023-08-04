@@ -1,4 +1,5 @@
 
+
 import numpy as np # linear algebra
 
 np.random.seed(101)
@@ -126,7 +127,10 @@ def get_filelist():
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
 
     name += ['control14a']
-    dirs += ['..//input/predict-control-bk0of14/train/control/*.*' ] 
+    dirs += ['../input/predict-control-bk0of14/train/control/*.*' ] 
+
+    name += ['control14d]
+    dirs += ['../kaggle/input/meth-control-bk3of14/train/control/*.*']
 
     name +=['alz0']
     dirs +=['../input/ad-con-park-frst60/train/alz/*.*']
