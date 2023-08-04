@@ -129,7 +129,7 @@ def get_filelist():
     name += ['control14a']
     dirs += ['../input/predict-control-bk0of14/train/control/*.*' ] 
 
-    name += ['control14d]
+    name += ['control14d']
     dirs += ['../kaggle/input/meth-control-bk3of14/train/control/*.*']
 
     name +=['alz0']
