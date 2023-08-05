@@ -176,9 +176,9 @@ def get_filelist():
         files = glob( dr )
         Files+=files
     t_ids = [ os.path.basename(g).split('.')[0] for g in Files ]
-    id2file = { os.path.basename(g).split('.')[0]:g for g in Files }
-
-    t_ids = np.unique(t_ids)
+ 
+    t_ids = np.unique(t_ids) # remove duplicates
+    id2file = { os.path.basename(g).split('.')[0]:g for g in Files }   
     if len(t_ids)>0:
         fig =px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
         fig.show()
