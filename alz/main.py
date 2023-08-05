@@ -159,7 +159,6 @@ def get_filelist():
     name +=['rheu','hunt']
     dirs +=['../input/predict-%s/train/%s/*.*'%('rheu','rheu')]
     dirs +=['../input/predict-%s/train/%s/*.*'%('hunt','hunt')]
-
  
     name += ['sjog']
     dirs += ['../input/meth-sjog/sjog/kaggle/working/train/sjog/*.*']
@@ -176,13 +175,14 @@ def get_filelist():
         files = glob( dr )
         Files+=files
     t_ids = [ os.path.basename(g).split('.')[0] for g in Files ]
+    id2file = { os.path.basename(g).split('.')[0]:g for g in Files }   
  
     t_ids = np.unique(t_ids) # remove duplicates
-    id2file = { os.path.basename(g).split('.')[0]:g for g in Files }   
+ 
     if len(t_ids)>0:
         fig =px.histogram(trn_map.loc[t_ids],'disease', title='Current sample of training set', )
         fig.show()
-    print( len(t_ids), 'avail train samples')
+    print( len(t_ids), 'avail train samples', len(Files), len(id2file) )
     return Files, t_ids, id2file
 
 # ================== evaluation code snippet provided by University 
