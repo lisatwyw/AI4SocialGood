@@ -6,6 +6,8 @@
 ## Packaging models
 
 ```
+
+tflitemodel_base = TFLiteModel(model)
 tflite_model = keras_model_converter.convert()
 with open('model.tflite', 'wb') as f:
     f.write(tflite_model)
