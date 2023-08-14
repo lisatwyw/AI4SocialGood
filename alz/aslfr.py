@@ -159,6 +159,8 @@ def positional_encoding(maxlen, num_hid):
           [tf.math.sin(angle_rads), tf.math.cos(angle_rads)],
           axis=-1)
         return pos_encoding
+
+
 def CTCLoss(labels, logits):
     label_length = tf.reduce_sum(tf.cast(labels != pad_token_idx, tf.int32), axis=-1)
     logit_length = tf.ones(tf.shape(logits)[0], dtype=tf.int32) * tf.shape(logits)[1]
@@ -172,7 +174,9 @@ def CTCLoss(labels, logits):
         )
     loss = tf.reduce_mean(loss)
     return loss
-def get_model(dim = 384,num_blocks = 6,drop_rate  = 0.4):
+
+
+def get_model(dim = 384, num_blocks = 6, drop_rate = 0.4):
     inp = tf.keras.Input(INPUT_SHAPE)
     x = tf.keras.layers.Masking(mask_value=0.0)(inp)
     x = tf.keras.layers.Dense(dim, use_bias=False, name='stem_conv')(x)
@@ -204,8 +208,94 @@ def get_model(dim = 384,num_blocks = 6,drop_rate  = 0.4):
 
 
 
+def lrfn(current_step, num_warmup_steps, lr_max, num_cycles=0.50, num_training_steps=N_EPOCHS):
+    
+    if current_step < num_warmup_steps:
+        if WARMUP_METHOD == 'log':
+            return lr_max * 0.10 ** (num_warmup_steps - current_step)
+        else:
+            return lr_max * 2 ** -(num_warmup_steps - current_step)
+    else:
+        progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
+
+        return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress))) * lr_max
+    
+def plot_lr_schedule(lr_schedule, epochs):
+    fig = plt.figure(figsize=(20, 10))
+    plt.plot([None] + lr_schedule + [None])
+    # X Labels
+    x = np.arange(1, epochs + 1)
+    x_axis_labels = [i if epochs <= 40 or i % 5 == 0 or i == 1 else None for i in range(1, epochs + 1)]
+    plt.xlim([1, epochs])
+    plt.xticks(x, x_axis_labels) # set tick step to 1 and let x axis start at 1
+    
+    # Increase y-limit for better readability
+    plt.ylim([0, max(lr_schedule) * 1.1])
+    
+    # Title
+    schedule_info = f'start: {lr_schedule[0]:.1E}, max: {max(lr_schedule):.1E}, final: {lr_schedule[-1]:.1E}'
+    plt.title(f'Step Learning Rate Schedule, {schedule_info}', size=18, pad=12)
+    
+    # Plot Learning Rates
+    for x, val in enumerate(lr_schedule):
+        if epochs <= 40 or x % 5 == 0 or x is epochs - 1:
+            if x < len(lr_schedule) - 1:
+                if lr_schedule[x - 1] < val:
+                    ha = 'right'
+                else:
+                    ha = 'left'
+            elif x == 0:
+                ha = 'right'
+            else:
+                ha = 'left'
+            plt.plot(x + 1, val, 'o', color='black');
+            offset_y = (max(lr_schedule) - min(lr_schedule)) * 0.02
+            plt.annotate(f'{val:.1E}', xy=(x + 1, val + offset_y), size=12, ha=ha)
+    
+    plt.xlabel('Epoch', size=16, labelpad=5)
+    plt.ylabel('Learning Rate', size=16, labelpad=5)
+    plt.grid()
+    plt.show()
 
 
+# Custom callback to update weight decay with learning rate
+class WeightDecayCallback(tf.keras.callbacks.Callback):
+    def __init__(self, wd_ratio=WD_RATIO):
+        self.step_counter = 0
+        self.wd_ratio = wd_ratio
+    
+    def on_epoch_begin(self, epoch, logs=None):
+        model.optimizer.weight_decay = model.optimizer.learning_rate * self.wd_ratio
+        print(f'learning rate: {model.optimizer.learning_rate.numpy():.2e}, weight decay: {model.optimizer.weight_decay.numpy():.2e}')
+
+
+# Learning rate for encoder
+LR_SCHEDULE = [lrfn(step, num_warmup_steps=N_WARMUP_EPOCHS, lr_max=LR_MAX, num_cycles=0.50) for step in range(N_EPOCHS)]
+# Plot Learning Rate Schedule
+plot_lr_schedule(LR_SCHEDULE, epochs=N_EPOCHS)
+# Learning Rate Callback
+lr_callback = tf.keras.callbacks.LearningRateScheduler(lambda step: LR_SCHEDULE[step], verbose=0)
+
+saver = tf.keras.callbacks.ModelCheckpoint(
+    '../working/model{epoch:02d}',
+    monitor= 'val_loss',
+    verbose = 0,
+    save_best_only= False,
+    save_weights_only = False,
+    mode = 'auto',
+    save_freq='epoch',
+    options=None,
+    initial_value_threshold=None,
+)
+
+# Callback function to check transcription on the val set.
+validation_callback = CallbackEval(val_dataset.take(1))
+
+
+#val_dataset.take(1))
+
+batch = next(iter(val_dataset))
+print( 'validation batch:',batch[0].shape, batch[1].shape )
 
 
 tf.keras.backend.clear_session()
