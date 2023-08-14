@@ -277,7 +277,7 @@ plot_lr_schedule(LR_SCHEDULE, epochs=N_EPOCHS)
 lr_callback = tf.keras.callbacks.LearningRateScheduler(lambda step: LR_SCHEDULE[step], verbose=0)
 
 saver = tf.keras.callbacks.ModelCheckpoint(
-    prefix + '_{epoch:02d}.hf',
+    prefix + '_{epoch:02d}.hd5f',
     monitor= 'val_loss',
     verbose = 0,
     save_best_only= False,
@@ -290,7 +290,6 @@ saver = tf.keras.callbacks.ModelCheckpoint(
 
 # Callback function to check transcription on the val set.
 validation_callback = CallbackEval(val_dataset.take(1))
-
 
 #val_dataset.take(1))
 
