@@ -352,17 +352,45 @@ saver = tf.keras.callbacks.ModelCheckpoint(
 
 #val_dataset.take(1))
 
-batch = next(iter(val_dataset))
-print( 'validation batch:',batch[0].shape, batch[1].shape )
+try:
+    batch = next(iter(val_dataset))
+    print( 'validation batch:',batch[0].shape, batch[1].shape )
+except:
+    pass
 
 
-tf.keras.backend.clear_session()
-#model = get_model()
-#model(batch[0])
-#model.summary()
+class TFLiteModel(tf.Module):
+    def __init__(self, model):
+        super(TFLiteModel, self).__init__()
+        self.model = model
+    
+    @tf.function(input_signature=[tf.TensorSpec(shape=[None, len(SEL_COLS)], dtype=tf.float32, name='inputs')])
+    def __call__(self, inputs, training=False):
+        # Preprocess Data
+        x = tf.cast(inputs, tf.float32)
+        x = x[None]
+        x = tf.cond(tf.shape(x)[1] == 0, lambda: tf.zeros((1, 1, len(SEL_COLS))), lambda: tf.identity(x))
+        x = x[0]
+        x = pre_process0(x)
+        x = pre_process1(*x)
+        x = tf.reshape(x, INPUT_SHAPE)
+        x = x[None]
+        x = self.model(x, training=False)
+        x = x[0]
+        x = decode_phrase(x)
+        x = tf.cond(tf.shape(x)[0] == 0, lambda: tf.zeros(1, tf.int64), lambda: tf.identity(x))
+        x = tf.one_hot(x, 59)
+        return {'outputs': x}
 
-import spacy
-
+def package()
+    keras_model_converter = tf.lite.TFLiteConverter.from_keras_model(tflitemodel_base)
+    keras_model_converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]#, tf.lite.OpsSet.SELECT_TF_OPS]
+    tflite_model = keras_model_converter.convert()
+    with open('model.tflite', 'wb') as f:
+        f.write(tflite_model)        
+    with open('inference_args.json', "w") as f:
+        json.dump({"selected_columns" : SEL_COLS}, f)
+        
 def eval():
     EQUIRED_SIGNATURE = "serving_default"
     REQUIRED_OUTPUT = "outputs"
@@ -371,6 +399,7 @@ def eval():
         character_map = json.load(f)
     rev_character_map = {j:i for i,j in character_map.items()}
     
+    interpreter = tf.lite.Interpreter("model.tflite")
     prediction_fn = interpreter.get_signature_runner(REQUIRED_SIGNATURE)
     
     for frame, target in test_dataset.skip(100).take(10):
@@ -379,3 +408,5 @@ def eval():
         target = target.numpy().decode("utf-8")
         print("pred =", prediction_str, "; target =", target)
         
+
+    
