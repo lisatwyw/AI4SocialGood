@@ -588,41 +588,8 @@ def decode_batch_predictions(pred):
         result = "".join(num_to_char_fn(decode_phrase(result).numpy()))
         output_text.append(result)
     return output_text
-    
 
-class TFLiteModel(tf.Module):
-    def __init__(self, model):
-        super(TFLiteModel, self).__init__()
-        self.model = model
-    
-    @tf.function(input_signature=[tf.TensorSpec(shape=[None, len(SEL_COLS)], dtype=tf.float32, name='inputs')])
-    def __call__(self, inputs, training=False):
-        # Preprocess Data
-        x = tf.cast(inputs, tf.float32)
-        x = x[None]
-        x = tf.cond(tf.shape(x)[1] == 0, lambda: tf.zeros((1, 1, len(SEL_COLS))), lambda: tf.identity(x))
-        x = x[0]
-        x = pre_process0(x)
-        x = pre_process1(*x)
-        x = tf.reshape(x, INPUT_SHAPE)
-        x = x[None]
-        x = self.model(x, training=False)
-        x = x[0]
-        x = decode_phrase(x)
-        x = tf.cond(tf.shape(x)[0] == 0, lambda: tf.zeros(1, tf.int64), lambda: tf.identity(x))
-        x = tf.one_hot(x, 59)
-        return {'outputs': x}
 
-def package( tflitemodel_base, out ='model.tflite' , out2='inference_args.json' ):
-    tflitemodel_base = TFLiteModel(model) 
-    keras_model_converter = tf.lite.TFLiteConverter.from_keras_model(tflitemodel_base)
-    keras_model_converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]#, tf.lite.OpsSet.SELECT_TF_OPS]
-    tflite_model = keras_model_converter.convert()
-    with open( out, 'wb') as f:
-        f.write(tflite_model)        
-    with open( out2, "w") as f:
-        json.dump({"selected_columns" : SEL_COLS}, f)
-        
 def eval():
     EQUIRED_SIGNATURE = "serving_default"
     REQUIRED_OUTPUT = "outputs"
