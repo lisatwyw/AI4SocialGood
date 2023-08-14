@@ -382,13 +382,13 @@ class TFLiteModel(tf.Module):
         x = tf.one_hot(x, 59)
         return {'outputs': x}
 
-def package()
+def package( tflitemodel_base, out ='model.tflite' , out2='inference_args.json' ):
     keras_model_converter = tf.lite.TFLiteConverter.from_keras_model(tflitemodel_base)
     keras_model_converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]#, tf.lite.OpsSet.SELECT_TF_OPS]
     tflite_model = keras_model_converter.convert()
-    with open('model.tflite', 'wb') as f:
+    with open( out, 'wb') as f:
         f.write(tflite_model)        
-    with open('inference_args.json', "w") as f:
+    with open( out2, "w") as f:
         json.dump({"selected_columns" : SEL_COLS}, f)
         
 def eval():
