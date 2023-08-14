@@ -383,6 +383,7 @@ class TFLiteModel(tf.Module):
         return {'outputs': x}
 
 def package( tflitemodel_base, out ='model.tflite' , out2='inference_args.json' ):
+    tflitemodel_base = TFLiteModel(model) 
     keras_model_converter = tf.lite.TFLiteConverter.from_keras_model(tflitemodel_base)
     keras_model_converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]#, tf.lite.OpsSet.SELECT_TF_OPS]
     tflite_model = keras_model_converter.convert()
