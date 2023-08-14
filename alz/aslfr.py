@@ -287,6 +287,8 @@ class WeightDecayCallback(tf.keras.callbacks.Callback):
         model.optimizer.weight_decay = model.optimizer.learning_rate * self.wd_ratio
         print(f'learning rate: {model.optimizer.learning_rate.numpy():.2e}, weight decay: {model.optimizer.weight_decay.numpy():.2e}')
 
+
+
 # A callback class to output a few transcriptions during training
 class CallbackEval(tf.keras.callbacks.Callback):
     """Displays a batch of outputs after every epoch."""
@@ -320,13 +322,19 @@ class CallbackEval(tf.keras.callbacks.Callback):
 
 # Learning rate for encoder
 LR_SCHEDULE = [lrfn(step, num_warmup_steps=N_WARMUP_EPOCHS, lr_max=LR_MAX, num_cycles=0.50) for step in range(N_EPOCHS)]
+
 # Plot Learning Rate Schedule
 plot_lr_schedule(LR_SCHEDULE, epochs=N_EPOCHS)
+
 # Learning Rate Callback
 lr_callback = tf.keras.callbacks.LearningRateScheduler(lambda step: LR_SCHEDULE[step], verbose=0)
+
 wt_callback = WeightDecayCallback()
 
+# Callback function to check transcription on the val set.
+validation_callback = CallbackEval(val_dataset.take(1))
 
+# save every epoch
 saver = tf.keras.callbacks.ModelCheckpoint(
     prefix + '_{epoch:02d}.hd5f',
     monitor= 'val_loss',
@@ -339,8 +347,6 @@ saver = tf.keras.callbacks.ModelCheckpoint(
     initial_value_threshold=None,
 )
 
-# Callback function to check transcription on the val set.
-validation_callback = CallbackEval(val_dataset.take(1))
 
 
 
