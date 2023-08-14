@@ -562,6 +562,34 @@ except:
     pass
 
 
+
+
+# ==================================================================== 
+# Decode phrase
+# ==================================================================== 
+
+def num_to_char_fn(y):
+    return [num_to_char.get(x, "") for x in y]
+
+@tf.function()
+def decode_phrase(pred):
+    x = tf.argmax(pred, axis=1)
+    diff = tf.not_equal(x[:-1], x[1:])
+    adjacent_indices = tf.where(diff)[:, 0]
+    x = tf.gather(x, adjacent_indices)
+    mask = x != pad_token_idx
+    x = tf.boolean_mask(x, mask, axis=0)
+    return x
+
+# A utility function to decode the output of the network
+def decode_batch_predictions(pred):
+    output_text = []
+    for result in pred:
+        result = "".join(num_to_char_fn(decode_phrase(result).numpy()))
+        output_text.append(result)
+    return output_text
+    
+
 class TFLiteModel(tf.Module):
     def __init__(self, model):
         super(TFLiteModel, self).__init__()
