@@ -277,7 +277,7 @@ plot_lr_schedule(LR_SCHEDULE, epochs=N_EPOCHS)
 lr_callback = tf.keras.callbacks.LearningRateScheduler(lambda step: LR_SCHEDULE[step], verbose=0)
 
 saver = tf.keras.callbacks.ModelCheckpoint(
-    '../working/model{epoch:02d}',
+    prefix + '_{epoch:02d}.hf',
     monitor= 'val_loss',
     verbose = 0,
     save_best_only= False,
@@ -299,6 +299,25 @@ print( 'validation batch:',batch[0].shape, batch[1].shape )
 
 
 tf.keras.backend.clear_session()
-model = get_model()
-model(batch[0])
-model.summary()
+#model = get_model()
+#model(batch[0])
+#model.summary()
+
+import spacy
+
+def eval():
+    EQUIRED_SIGNATURE = "serving_default"
+    REQUIRED_OUTPUT = "outputs"
+    
+    with open ("/kaggle/input/asl-fingerspelling/character_to_prediction_index.json", "r") as f:
+        character_map = json.load(f)
+    rev_character_map = {j:i for i,j in character_map.items()}
+    
+    prediction_fn = interpreter.get_signature_runner(REQUIRED_SIGNATURE)
+    
+    for frame, target in test_dataset.skip(100).take(10):
+        output = prediction_fn(inputs=frame)
+        prediction_str = "".join([rev_character_map.get(s, "") for s in np.argmax(output[REQUIRED_OUTPUT], axis=1)])
+        target = target.numpy().decode("utf-8")
+        print("pred =", prediction_str, "; target =", target)
+        
