@@ -11,7 +11,9 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 IS_INTERACTIVE = os.environ['KAGGLE_KERNEL_RUN_TYPE'] == 'Interactive'
 
-
+# ==================================================================== 
+# Model + loss 
+# ====================================================================
 class ECA(tf.keras.layers.Layer):
     def __init__(self, kernel_size=5, **kwargs):
         super().__init__(**kwargs)
@@ -162,6 +164,20 @@ def positional_encoding(maxlen, num_hid):
 
 
 def CTCLoss(labels, logits):
+    """
+    Connectionist Temporal Classification (CTC) loss
+    
+    The traditional approach of splitting sequences into groups and classifying each group becomes challenging when dealing with variable-length phrases. 
+    CTC loss allows training models with a variable output length.
+    
+    The main idea behind CTC loss is to predict a matrix of shape NxT, where N represents the number of possible characters plus one special reserved character 
+    and T is the maximum possible length of the predicted sequence.
+    
+    Each column in the matrix represents N probabilities of characters predicted per frame.
+    
+    The magic happens during decoding, where duplicated characters are squeezed into a single character, 
+    using a special reserved character "#" to represent duplicates.
+    """
     label_length = tf.reduce_sum(tf.cast(labels != pad_token_idx, tf.int32), axis=-1)
     logit_length = tf.ones(tf.shape(logits)[0], dtype=tf.int32) * tf.shape(logits)[1]
     loss = tf.nn.ctc_loss(
@@ -207,6 +223,9 @@ def get_model(dim = 384, num_blocks = 6, drop_rate = 0.4):
     return model
 
 
+# ==================================================================== 
+# Callbacks
+# ==================================================================== 
 
 def lrfn(current_step, num_warmup_steps, lr_max, num_cycles=0.50, num_training_steps=N_EPOCHS):
     
@@ -268,6 +287,36 @@ class WeightDecayCallback(tf.keras.callbacks.Callback):
         model.optimizer.weight_decay = model.optimizer.learning_rate * self.wd_ratio
         print(f'learning rate: {model.optimizer.learning_rate.numpy():.2e}, weight decay: {model.optimizer.weight_decay.numpy():.2e}')
 
+# A callback class to output a few transcriptions during training
+class CallbackEval(tf.keras.callbacks.Callback):
+    """Displays a batch of outputs after every epoch."""
+
+    def __init__(self, dataset):
+        super().__init__()
+        self.dataset = dataset
+
+    def on_epoch_end(self, epoch: int, logs=None):
+        model.save_weights(f"model_{epoch:02d}.h5")
+        predictions = []
+        targets = []
+        for batch in self.dataset:
+            X, y = batch
+            batch_predictions = model(X)
+            batch_predictions = decode_batch_predictions(batch_predictions)
+            predictions.extend(batch_predictions)
+            for label in y:
+                label = "".join(num_to_char_fn(label.numpy()))
+                targets.append(label)
+        print("-" * 100)
+        # for i in np.random.randint(0, len(predictions), 2):
+        for i in range(16):
+            print(f"Target    : {targets[i]}")
+            print(f"Prediction: {predictions[i]}, len: {len(predictions[i])}")
+            print("-" * 100)
+
+
+
+
 
 # Learning rate for encoder
 LR_SCHEDULE = [lrfn(step, num_warmup_steps=N_WARMUP_EPOCHS, lr_max=LR_MAX, num_cycles=0.50) for step in range(N_EPOCHS)]
@@ -275,6 +324,8 @@ LR_SCHEDULE = [lrfn(step, num_warmup_steps=N_WARMUP_EPOCHS, lr_max=LR_MAX, num_c
 plot_lr_schedule(LR_SCHEDULE, epochs=N_EPOCHS)
 # Learning Rate Callback
 lr_callback = tf.keras.callbacks.LearningRateScheduler(lambda step: LR_SCHEDULE[step], verbose=0)
+wt_callback = WeightDecayCallback()
+
 
 saver = tf.keras.callbacks.ModelCheckpoint(
     prefix + '_{epoch:02d}.hd5f',
@@ -290,6 +341,8 @@ saver = tf.keras.callbacks.ModelCheckpoint(
 
 # Callback function to check transcription on the val set.
 validation_callback = CallbackEval(val_dataset.take(1))
+
+
 
 #val_dataset.take(1))
 
