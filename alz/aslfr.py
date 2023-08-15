@@ -270,6 +270,8 @@ def Conv1DBlock(channel_size,
     '''
     if name is None:
         name = str(tf.keras.backend.get_uid("mbblock"))
+
+              
     # Expansion phase
     def apply(inputs):
         channels_in = tf.keras.backend.int_shape(inputs)[-1]
@@ -395,7 +397,7 @@ def CTCLoss(labels, logits):
     return loss
 
 
-def get_model(dim = 384, num_blocks = 6, drop_rate = 0.4):
+def get_model(dim = 384, num_blocks = 6, drop_rate = 0.4, N_ATT_HEADS = 6):
     inp = tf.keras.Input(INPUT_SHAPE)
     x = tf.keras.layers.Masking(mask_value=0.0)(inp)
     x = tf.keras.layers.Dense(dim, use_bias=False, name='stem_conv')(x)
@@ -407,7 +409,7 @@ def get_model(dim = 384, num_blocks = 6, drop_rate = 0.4):
         x = Conv1DBlock(dim, 11, drop_rate=drop_rate)(x)
         x = Conv1DBlock(dim,  5, drop_rate=drop_rate)(x)
         x = Conv1DBlock(dim,  3, drop_rate=drop_rate)(x)
-        x = TransformerBlock(dim, expand=2)(x)
+        x = TransformerBlock(dim, num_heads=N_ATT_HEADS, expand=2)(x)
 
     x = tf.keras.layers.Dense(dim*2,activation='relu',name='top_conv')(x)
     x = tf.keras.layers.Dropout(drop_rate)(x)
