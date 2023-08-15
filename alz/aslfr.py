@@ -399,6 +399,7 @@ def CTCLoss(labels, logits):
 
 def get_model(dim = 384, num_blocks = 6, drop_rate = 0.4, N_ATT_HEADS = 6):
     inp = tf.keras.Input(INPUT_SHAPE)
+    
     x = tf.keras.layers.Masking(mask_value=0.0)(inp)
     x = tf.keras.layers.Dense(dim, use_bias=False, name='stem_conv')(x)
     pe = tf.cast(positional_encoding(INPUT_SHAPE[0], dim), dtype=x.dtype)
@@ -541,7 +542,7 @@ validation_callback = CallbackEval(val_dataset.take(1))
 
 # save every epoch
 saver = tf.keras.callbacks.ModelCheckpoint(
-    prefix + '_{epoch:04d}.hd5f',
+    prefix + '_{epoch:03d}.hd5f',
     monitor= 'val_loss',
     verbose = 0,
     save_best_only= False,
