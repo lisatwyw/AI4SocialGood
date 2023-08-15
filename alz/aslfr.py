@@ -541,13 +541,14 @@ validation_callback = CallbackEval(val_dataset.take(1))
 
 # save every epoch
 saver = tf.keras.callbacks.ModelCheckpoint(
-    prefix + '_{epoch:02d}.hd5f',
+    prefix + '_{epoch:04d}.hd5f',
     monitor= 'val_loss',
     verbose = 0,
     save_best_only= False,
-    save_weights_only = False,
+    save_weights_only = True,
     mode = 'auto',
     save_freq='epoch',
+    period=2,
     options=None,
     initial_value_threshold=None,
 )
