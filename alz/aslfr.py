@@ -503,7 +503,7 @@ class CallbackEval(tf.keras.callbacks.Callback):
         self.dataset = dataset
 
     def on_epoch_end(self, epoch: int, logs=None):
-        model.save_weights(f"model_{epoch:02d}.h5")
+        # model.save_weights(f"model_{epoch:03d}.h5")
         predictions = []
         targets = []
         for batch in self.dataset:
