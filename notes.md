@@ -3,6 +3,9 @@
 ## Kaggle-Colab
 [How to use Kaggle datasets with your Colab](Kaggle2Colab.ipynb)
 
+## Number of model parameters in Pytorch and Tensorflow
+
+https://wandb.ai/wandb_fc/tips/reports/How-to-Calculate-Number-of-Model-Parameters-for-PyTorch-and-Tensorflow-Models--VmlldzoyMDYyNzIx
 
 ## Packaging models
 
