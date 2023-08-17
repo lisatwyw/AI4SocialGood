@@ -1,4 +1,22 @@
+## ```Polars```
+```
+import polars as pl
 
+rolling_stones = """
+linenum,last_name,first_name
+1,Jagger,Mick
+2,O"Brian,Mary
+3,Richards,Keith
+4,L"Etoile,Bennet
+5,Watts,Charlie
+6,Smith,D"Shawn
+7,Wyman,Bill
+8,Woods,Ron
+9,Jones,Brian
+"""
+
+print(pl.read_csv(rolling_stones.encode(), quote_char=None))
+```
 
 ## Kaggle-Colab
 [How to use Kaggle datasets with your Colab](Kaggle2Colab.ipynb)
