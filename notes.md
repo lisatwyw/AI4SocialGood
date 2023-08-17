@@ -3,9 +3,14 @@
 ## Kaggle-Colab
 [How to use Kaggle datasets with your Colab](Kaggle2Colab.ipynb)
 
-## Number of model parameters in Pytorch and Tensorflow
+```
+/opt/conda/lib/python3.10/site-packages 
+```
 
+## Number of model parameters in Pytorch and Tensorflow
 https://wandb.ai/wandb_fc/tips/reports/How-to-Calculate-Number-of-Model-Parameters-for-PyTorch-and-Tensorflow-Models--VmlldzoyMDYyNzIx
+
+
 
 ## Packaging models
 
@@ -37,3 +42,6 @@ https://github.com/understandable-machine-intelligence-lab/Quantus/blob/main/tut
 
 https://huggingface.co/spaces/xdecoder/SEEM
 [BERT-seq](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9028677/)
+
+
+
