@@ -419,7 +419,7 @@ def get_model(  hp ):
         mon = 'mse'
     else:
         out_name='classify'
-        pred = Dense( trn_gen.nclasses, activation='softmax', name=out_name)(x)
+        pred = Dense( hp['nc'], activation='softmax', name=out_name)(x)
         losses = {out_name: 'binary_crossentropy',}
         metrics= ['binary_crossentropy', get_f1macro]
         mon = 'f1_macro'
