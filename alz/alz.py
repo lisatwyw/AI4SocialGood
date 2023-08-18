@@ -390,7 +390,7 @@ def get_model(  hp ):
 
     elif 'sleep' in hp['mid']:
         DO=hp['DO'] 
-        inputs = Input(shape=(SEQLEN, 1))
+        inputs = Input(shape=( hp['SEQLEN'], 1))
         x = Conv1D( 64, 3, activation='relu', padding='same')(inputs)
         x = Conv1D( 128, 3, activation='relu', padding='same')(x)
         x = MaxPooling1D(2, padding='same')(x)
