@@ -1,8 +1,9 @@
 
-
 import numpy as np # linear algebra
-
 np.random.seed(101)
+
+import math
+from scipy.stats import pearsonr
 
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import plotly.express as px
@@ -10,16 +11,23 @@ import matplotlib.pyplot as plt
 import optuna
 from glob import glob
 
-import os, sys #, csv
+import os, sys gc #, csv
+IS_INTERACTIVE = os.environ['KAGGLE_KERNEL_RUN_TYPE'] == 'Interactive'
+
 import polars as pl
 from tqdm import tqdm
-import gc
 
 from torchmetrics.classification import MultilabelF1Score, MultilabelAccuracy
  
+#import tensorflow_addons as tfa
 import tensorflow_datasets as tfds
 import tensorflow as tf
-#import tensorflow_addons as tfa
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU'))); tf.debugging.set_log_device_placement(False)
+
+from tensorflow.keras.layers import Dense, Bidirectional, Flatten, LSTM, Conv1D, MaxPooling1D, RepeatVector
+from tensorflow.keras.layers import TimeDistributed, Input, GRU, Dropout, Masking 
+from tensorflow.keras.models import Model, load_model
+
 
 import sklearn
 from sklearn.preprocessing import StandardScaler
@@ -35,18 +43,25 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.linear_model import LassoCV
 from sklearn.metrics import average_precision_score, precision_recall_curve
-from scipy.stats import pearsonr
+from sklearn.model_selection import cross_val_score, cross_val_predict
+from sklearn.ensemble import VotingClassifier, StackingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from imblearn.ensemble import BalancedRandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
+
+# leave for optuna 
+from xgboost import XGBClassifier
+from catboost import CatBoostClassifier, CatBoostRegressor
+from lightgbm import LGBMClassifier, LGBMRegressor
 
 
-from tensorflow.keras.layers import Dense, Bidirectional, Flatten, LSTM, Conv1D, MaxPooling1D, RepeatVector
-from tensorflow.keras.layers import TimeDistributed, Input, GRU, Dropout, Masking 
-from tensorflow.keras.models import Model, load_model
- 
-import tensorflow as tf
-print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-tf.debugging.set_log_device_placement(False)
-
-import matplotlib.pyplot as plt
+    
 
 # ================== Problem specific admin ==================
 def grab():
