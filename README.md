@@ -2,7 +2,7 @@
 
 1. Society
    - AI in human trafficking
-   - Web-scraping suicide data
+   - Web-scraping data on suicide
 1. Climate research
    - AI in climate research
    - Contrail segmentation 
