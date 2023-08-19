@@ -134,11 +134,11 @@ def get_filelist():
     name = ['control9']
     dirs = ['../input/meth-control-9of50/train/control/*.*' ] 
     
-    for d in range(1,9,2):
+    for d in range(1,9):
         name += ['control%d' %d]
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]  
     
-    for d in range(10,29,2):
+    for d in range(10,29):
         name += ['control%d' %d]
         dirs += ['../input/predict-control-bk%dof50/train/control/*.*'%d ]
 
