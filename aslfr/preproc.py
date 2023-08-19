@@ -6,16 +6,19 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-
-
 import tensorflow as tf
-with open ("/kaggle/input/asl-fingerspelling/character_to_prediction_index.json", "r") as f:
+
+
+
+with open ("../input/asl-fingerspelling/character_to_prediction_index.json", "r") as f:
     char_to_num = json.load(f)
+
+
 def load_relevant_data_subset(pq_path):
     return pd.read_parquet(pq_path, columns=SEL_COLS)
 
 
-df = pd.read_csv('/kaggle/input/asl-fingerspelling/train.csv')
+df = pd.read_csv('../input/asl-fingerspelling/train.csv')
 
 LIP = [
     61, 185, 40, 39, 37, 0, 267, 269, 270, 409,
@@ -55,7 +58,7 @@ RPOSE_IDX_Z = [i for i, col in enumerate(SEL_COLS)  if  "pose" in col and int(co
 LPOSE_IDX_Z = [i for i, col in enumerate(SEL_COLS)  if  "pose" in col and int(col[-2:]) in LPOSE and "z" in col]
 
 file_id = df.file_id.iloc[0]
-inpdir = "/kaggle/input/asl-fingerspelling/train_landmarks"
+inpdir = "../input/asl-fingerspelling/train_landmarks"
 pqfile = f"{inpdir}/{file_id}.parquet"
 seq_refs = df.loc[df.file_id == file_id]
 seqs = load_relevant_data_subset(pqfile)
@@ -104,7 +107,7 @@ rhand, lhand, rpose, lpose, lip = process(frames)
 print(rhand.shape, lhand.shape, rpose.shape, lpose.shape, lip.shape)
 def gen(df):
     for file_id in df.file_id.unique():
-        pqfile = f"/kaggle/input/asl-fingerspelling/train_landmarks/{file_id}.parquet"
+        pqfile = f"../input/asl-fingerspelling/train_landmarks/{file_id}.parquet"
         seq_refs = df.loc[df.file_id == file_id]
         seqs = load_relevant_data_subset(pqfile)
 
@@ -232,6 +235,8 @@ for file_id in tqdm(df.file_id.unique()):
             
             record_bytes = tf.train.Example(features=tf.train.Features(feature=features)).SerializeToString()
             file_writer.write(record_bytes)
+
+
 def decode_fn(record_bytes):
     schema = {
         "lip": tf.io.VarLenFeature(tf.float32),
