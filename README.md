@@ -8,8 +8,8 @@
    - Contrail segmentation           /7
 1. ASL recognition                   /8
 1. Healthcare
-   - In-vitro cell research          /7
-   - Age regression using meth-data  /8-9
    - Groundglass opacity severity rating in CT  /3
-   - Fall prevention in seniors                 /8
+   - In-vitro cell research          /7
+   - Fall prevention in seniors      /8-9
+   - Age regression using meth-data  /8-9
   
