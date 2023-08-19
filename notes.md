@@ -18,6 +18,10 @@ linenum,last_name,first_name
 print(pl.read_csv(rolling_stones.encode(), quote_char=None))
 ```
 
+## ```tfa```
+
+[tfa-equivalence](https://docs.google.com/spreadsheets/d/1YMPudb7Otqx_TQu_oTHMm5IRZolyPcah8-qkMs_wI-I/)
+
 ## Kaggle-Colab
 [How to use Kaggle datasets with your Colab](Kaggle2Colab.ipynb)
 
