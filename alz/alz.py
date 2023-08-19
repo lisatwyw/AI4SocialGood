@@ -3,7 +3,7 @@ import numpy as np # linear algebra
 np.random.seed(101)
 
 import math
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import plotly.express as px
@@ -19,8 +19,10 @@ import polars as pl
 from tqdm import tqdm
 
 from torchmetrics.classification import MultilabelF1Score, MultilabelAccuracy
- 
-#import tensorflow_addons as tfa
+
+
+import tensorflow_addons as tfa  # gelu
+from tensorflow.keras import backend as K
 import tensorflow_datasets as tfds
 import tensorflow as tf
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU'))); tf.debugging.set_log_device_placement(False)
