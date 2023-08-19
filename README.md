@@ -6,7 +6,7 @@
    2. Contrail segmentation 
 1. ASL recognition
 1. Healthcare
-   2. in-vitra cell research
-   3. meth-data
-   4. Severity rating in CT
+   - in-vitra cell research
+   - meth-data
+   - Severity rating in CT
   
