@@ -1,12 +1,15 @@
 # AI4SocialGood
 
-1. AI in human trafficking
+1. Society
+   - AI in human trafficking
+   - Web-scraping suicide data
 1. Climate research
-   1. AI in climate research
-   2. Contrail segmentation 
+   - AI in climate research
+   - Contrail segmentation 
 1. ASL recognition
 1. Healthcare
-   - in-vitra cell research
-   - meth-data
-   - Severity rating in CT
+   - In-vitro cell research
+   - Age regression using meth-data
+   - Groundglass opacity severity rating in CT
+   - Fall prevention in seniors
   
