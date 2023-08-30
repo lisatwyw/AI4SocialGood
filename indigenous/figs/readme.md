@@ -2,3 +2,6 @@
 
 ![image](https://github.com/lisatwyw/AI4SocialGood/assets/38703113/e0ddf752-77cd-49b0-a37d-0cde4786813f)
 
+![image](https://github.com/lisatwyw/AI4SocialGood/assets/38703113/5417ea9a-792d-49af-8d82-2e4889f088fc)
+
+![image](https://github.com/lisatwyw/AI4SocialGood/assets/38703113/ab38be45-85e7-4751-8f27-23e567289b82)
