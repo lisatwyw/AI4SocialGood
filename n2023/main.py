@@ -57,7 +57,7 @@ tf.random.set_seed(SEED)
 
 # =================================== define functions ===================================
 
-def get_data():
+def get_data( folder='../input/neiss-2023/' ):
     with Path( folder + "variable_mapping.json").open("r") as f:
         mapping = json.load(f, parse_int=True)
 
@@ -321,7 +321,7 @@ def get_time2hosp():
         len(tst_case_nums), 'samples. \n\tOverlapped indices?', np.intersect1d( tst_case_nums, trn_case_nums ), '\n\n' )
 
     
-def get_meta_data():
+def get_meta_data(  ):
     cohort_inds = np.where( decoded_df2.time2hosp > 0 )[0]  
 
     sub = decoded_df2.iloc[cohort_inds,:]    
@@ -375,9 +375,11 @@ def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"
 if ( 'org_columns' in globals())==False:
 
     surv_pols,indices,sentences,meta,embeddings={},{},{},{},{}    
-    folder = '/kaggle/input/neiss-2023/'    
-    
-    decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data()
+
+    try:
+      decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data()
+    except:         
+      decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data(folder='')
     
     import nltk
     nltk.download('punkt'); 
