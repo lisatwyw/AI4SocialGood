@@ -1,5 +1,20 @@
 """
-Utility functions for model evaluation.
+Utility functions for model evaluation - originally from 
+
+Variational Deep Survival Clustering (vadesc)
+
+Please consider citing their work:
+
+@inproceedings{ManduchiMarcinkevics2022,
+  title={A Deep Variational Approach to Clustering Survival Data},
+  author={Laura Manduchi and Ri{\v{c}}ards Marcinkevi{\v{c}}s and Michela C. Massi 
+          and Thomas Weikert and Alexander Sauter and Verena Gotta 
+          and Timothy M{\"u}ller and Flavio Vasella and Marian C. Neidert 
+          and Marc Pfister and Bram Stieltjes and Julia E Vogt},
+  booktitle={International Conference on Learning Representations},
+  year={2022},
+}
+
 """
 import numpy as np
 
@@ -7,8 +22,15 @@ from lifelines.utils import concordance_index
 
 import sys
 
-#from sklearn.utils.linear_assignment_ import linear_assignment
-from scipy.optimize import linear_sum_assignment as linear_assignment
+
+
+# revisions 2023-Sep-05
+# https://stackoverflow.com/questions/62390517/no-module-named-sklearn-utils-linear-assignment
+from scipy.optimize import linear_sum_assignment as linear_assignment  
+#from sklearn.utils.linear_assignment_ import linear_assignment  
+
+
+
 
 from sklearn.metrics.cluster import normalized_mutual_info_score
 import tensorflow as tf
