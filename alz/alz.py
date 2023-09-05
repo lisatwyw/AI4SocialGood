@@ -1,4 +1,4 @@
-
+import os, sys, gc
 import numpy as np # linear algebra
 np.random.seed(101)
 
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import optuna
 from glob import glob
 
-import os, sys, gc 
+ 
 #, csv
 IS_INTERACTIVE = os.environ['KAGGLE_KERNEL_RUN_TYPE'] == 'Interactive'
 
