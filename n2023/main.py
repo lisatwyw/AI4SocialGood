@@ -28,7 +28,7 @@ import plotly.io as pio; pio.renderers.default = 'colab' # enable renderer
   'cocalc', 'databricks', 'json', 'png', 'jpeg', 'jpg', 'svg',
   'pdf', 'browser', 'firefox', 'chrome', 'chromium', 'iframe',
   'iframe_connected', 'sphinx_gallery', 'sphinx_gallery_png']
-'''
+''';
 from tqdm import tqdm
 
 from PIL import Image
@@ -51,7 +51,7 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 
 
-folder = '/kaggle/input/neiss-2023/'
+
 
 def get_data():
     with Path( folder + "variable_mapping.json").open("r") as f:
@@ -102,11 +102,6 @@ def get_data():
     trn_case_nums = np.setdiff1d( decoded_df2.cpsc_case_number, tst_case_nums )
     
     return decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums
-
-if ( 'org_columns' in globals())==False:
-    decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data()
-
- 
 
 
 
@@ -215,16 +210,16 @@ def clean_narrative(text0):
     return " ".join(sentences), dx
 
 def get_cleaned_narratives():
-  with mp.Pool(mp.cpu_count()) as pool:
-      res =  pool.map(clean_narrative, decoded_df2['narrative'] )     
-      
-  A = [ r[0] for r in res ]
-  B = [ r[1] for r in res ]
-  
-  decoded_df2['narrative_cleaned']= A
-  decoded_df2['narrated_dx'] = B     
-  
-get_cleaned_narratives()
+    with mp.Pool(mp.cpu_count()) as pool:
+        res =  pool.map(clean_narrative, decoded_df2['narrative'] )     
+
+    A = [ r[0] for r in res ]
+    B = [ r[1] for r in res ]
+
+    decoded_df2['narrative_cleaned']= A
+    decoded_df2['narrated_dx'] = B     
+    
+    
 
 def get_time2hosp(r):    
     t2hosp = -1      
@@ -289,20 +284,6 @@ def get_time2hosp(r):
                     t2hosp=1 # days  
     return t2hosp 
 
-decoded_df2['time2hosp']=0
-with mp.Pool(mp.cpu_count()) as pool:
-    decoded_df2['time2hosp'] = pool.map(get_time2hosp, decoded_df2['narrative_cleaned'] )
-    
-# size of survival data
-print( (decoded_df2['time2hosp']>0 ).sum()/decoded_df2.shape[0] )    
-
-print( 'If models were to be developed, we may split into trn set of', len(trn_case_nums), 'samples and tst set of',
-    len(tst_case_nums), 'samples. \n\tOverlapped indices?', np.intersect1d( tst_case_nums, trn_case_nums ), '\n\n' )
-
-
-# consumer product safety commission
-
-surv_pols = {}
 
 def meta_data():
     cohort_inds = np.where( decoded_df2.time2hosp > 0 )[0]  
@@ -333,16 +314,44 @@ def meta_data():
 
     return cohort_inds
 
-
-if ( 'cohort_inds' in globals())==False:
-    cohort_inds= meta_data()
-
 # https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models/
 def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"):
     from sentence_transformers import SentenceTransformer
     model = SentenceTransformer(pretrained)
     embeddings = model.encode(sentences)
     return embeddings
+
+
+
+
+
+
+
+
+
+
+
+
+folder = '/kaggle/input/neiss-2023/'    
+if ( 'org_columns' in globals())==False:
+    decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data()
+    
+get_cleaned_narratives()
+
+decoded_df2['time2hosp']=0
+with mp.Pool(mp.cpu_count()) as pool:
+    decoded_df2['time2hosp'] = pool.map(get_time2hosp, decoded_df2['narrative_cleaned'] )
+    
+# size of survival data
+print( (decoded_df2['time2hosp']>0 ).sum()/decoded_df2.shape[0] )    
+
+print( 'If models were to be developed, we may split into trn set of', len(trn_case_nums), 'samples and tst set of',
+    len(tst_case_nums), 'samples. \n\tOverlapped indices?', np.intersect1d( tst_case_nums, trn_case_nums ), '\n\n' )
+
+# consumer product safety commission
+surv_pols = {}
+if ( 'cohort_inds' in globals())==False:
+    cohort_inds= meta_data()
 
 sentences,meta,embeddings={},{},{}
 
