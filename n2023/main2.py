@@ -11,9 +11,6 @@ from pathlib import Path
 
 import textwrap
 
-import nltk
-#nltk.download('punkt'); 
-sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
 import multiprocessing as mp
 import re
@@ -137,7 +134,12 @@ def strip_basic_info( r ):
         dx = '' # assumed not narrated 
     return parts[0], dx
 
+
+
 def clean_narrative(text0):
+    import nltk
+    nltk.download('punkt'); 
+    sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
     abbr_terms = {
       "&": "and",
@@ -316,6 +318,7 @@ def meta_data():
 
 # https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models/
 def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"):
+
     from sentence_transformers import SentenceTransformer
     model = SentenceTransformer(pretrained)
     embeddings = model.encode(sentences)
