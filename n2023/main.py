@@ -1,4 +1,4 @@
- import json, os
+import json, os
 import pandas as pd
 
 import os, sys, pickle, json
@@ -10,7 +10,6 @@ from pathlib import Path
 #from IPython.display import clear_output;  clear_output()
 
 import textwrap
-
 
 import multiprocessing as mp
 import re
@@ -68,6 +67,32 @@ def get_data():
     df2['month'] = df2.treatment_date.dt.month
     df2['year'] = df2.treatment_date.dt.year
 
+    '''
+    1. White: A person having origins in any of the Europe, Middle East, or North Africa.
+    
+    2. Black/African American: A person having origins in any of the black racial groups of Africa.
+    
+    4. Asian: A person having origins in any of the original peoples of the Far East, Southeast Asia, or the Indian subcontinent
+    
+    5. American Indian/Alaska Native: A person having origins in any of the original peoples of North and South America (including Central America), and who maintains tribal affiliation or community attachment.
+    
+    6. Native Hawaiian/Pacific Islander: A person having origins in any of the original peoples of Hawaii, Guam, Samoa, or other Pacific Islands.
+    
+    7. White Hispanic 1 Race=1    
+    8. Black Hispanic 1 Race=2
+    
+    
+    3. ED record indicates more than one race (e.g., multiracial, biracial)    
+    '''
+    
+    df2['race_recoded'] =df2['race']      
+    q=np.where( (df2['hispanic'] == 1 ) & (df2['race'] == 1) )[0]    
+    df2['race_recoded'][q] = 7
+    q=np.where( (df2['hispanic'] == 1 ) & (df2['race'] == 2) )[0]
+    df2['race_recoded'][q] = 8 
+    
+    
+    
     df2['severity'] = df2['disposition'].replace(
         {'1 - TREATED/EXAMINED AND RELEASED': 3,
          '2 - TREATED AND TRANSFERRED': 4,
@@ -114,7 +139,7 @@ def rid_typos( r ):
     r=r.replace('COUPLEOF','COUPLE OF').replace('A DAY','1 DAY').replace('HALF HOUR','1 HOUR') # round to 1 hour
     r=r.replace('   ',' ').replace('  ',' ').replace('DAYSA GO', 'DAYS AGO')
     r=r.replace('LAST MIGHT AND', 'LAST NIGHT AND').replace('AT NH','AT NURSING HOME').replace('BAKC', 'BACK')
-    r=r.replace('DXZ','DX').replace('10NIS', 'TENNIS').replace('N/S INJURY', 'NOT SIGNIFICANT INJURY')
+    r=r.replace('DXZ','DX').replace('10NIS', 'TENNIS').replace('N/S INJURY', 'NOT SIGNIFICANT INJURY').replace('*','')
     return r
 
 def strip_basic_info( r ):
@@ -140,7 +165,7 @@ def clean_narrative(text0):
 
     abbr_terms = {
       "&": "and",
-      "***": "",
+      "***": "",      
       ">>": "DX",
       "@": "at",
       "abd": "abdomen",
@@ -220,35 +245,35 @@ def get_cleaned_narratives():
     
     
 
-def get_time2hosp(r):    
+def _get_time2hosp(r):  # in hours   
     t2hosp = -1      
     r = r.upper()           
     if (r.find('SEVERAL HOURS AGO')>=0) | (r.find('COUPLE OF HOURS AGO')>=0) | (r.find('MULTIPLE HOURS AGO')>=0) | (r.find('COUPLE HOURS AGO')>=0) | (r.find('FEW HOURS AGO')>=0) | (r.find('SEV. HOURS AGO')>=0):
-        t2hosp=6/24
+        t2hosp=6
     elif (r.find('SEVERAL DAYS AGO')>=0) | (r.find('COUPLE OF DAYS AGO')>=0) | (r.find('MULTIPLE DAYS AGO')>=0) | (r.find('COUPLE DAYS AGO')>=0) | (r.find('FEW DAYS AGO')>=0) | (r.find('SEV. DAYS AGO')>=0):
-        t2hosp=3
+        t2hosp=3*24
     elif r.find('2 WEEKS AGO')>=0:
-        t2hosp=14
+        t2hosp=14*24
     elif r.find('A WEEK AGO')>=0:
-        t2hosp=7        
+        t2hosp=7*24        
     elif r.find('MONTH AGO')>=0:
-        t2hosp=30        
+        t2hosp=30*24        
     elif r.find('TODAY')>=0:
-        t2hosp=1/2                
+        t2hosp=12                
     elif r.find('YESTERDAY')>=0:        
-        t2hosp=1
+        t2hosp=24
     elif r.find('PREVIOUS DAY')>=0:        
-        t2hosp=1
+        t2hosp=24
     elif r.find('PREV DAY')>=0:        
-        t2hosp=1    
+        t2hosp=24    
     elif r.find('YESTERDAY MORNING')>=0:
-        t2hosp=1
+        t2hosp=24
     elif r.find('MORNING')>=0:
-        t2hosp=6/24
+        t2hosp=6
     elif r.find('THIS AFTERNOON')>=0:
-        t2hosp=6/24
+        t2hosp=6
     elif r.find('LAST NIGHT')>=0:
-        t2hosp=18/24
+        t2hosp=18
     else:    
         s0 = r.find('HOURS AGO')  
         if s0==-1:
@@ -259,7 +284,7 @@ def get_time2hosp(r):
         if s0>=0: # hours =============
             nh = r[s0-2:s0]
             try:
-                o=np.float64(nh)/24
+                o=np.float64(nh)
                 t2hosp=o
             except:
                 try:
@@ -268,9 +293,9 @@ def get_time2hosp(r):
                     t2hosp=o
                 except:
                     if r.find('HOUR AGO') >0:
-                        t2hosp=1/24
+                        t2hosp=1
                     else:
-                        t2hosp=6/24                            
+                        t2hosp=6                            
         elif s1>=0: # days
             st= r[s1-2:s1].replace(' ','')
             try:
@@ -280,38 +305,57 @@ def get_time2hosp(r):
                     st= r[s1-1:s1]
                     t2hosp=np.int8(st)
                 except:                
-                    t2hosp=1 # days  
+                    t2hosp=24 # in day  
     return t2hosp 
 
 
-def meta_data():
+def get_time2hosp():
+    decoded_df2['time2hosp']=0
+    with mp.Pool(mp.cpu_count()) as pool:
+        decoded_df2['time2hosp'] = pool.map( _get_time2hosp, decoded_df2['narrative_cleaned'] )
+
+    # size of survival data
+    print( (decoded_df2['time2hosp']>0 ).sum()/decoded_df2.shape[0] )    
+
+    print( 'If models were to be developed, we may split into trn set of', len(trn_case_nums), 'samples and tst set of',
+        len(tst_case_nums), 'samples. \n\tOverlapped indices?', np.intersect1d( tst_case_nums, trn_case_nums ), '\n\n' )
+
+    
+def get_meta_data():
     cohort_inds = np.where( decoded_df2.time2hosp > 0 )[0]  
-    sub = decoded_df2.iloc[cohort_inds,:]
-    sub.set_index('cpsc_case_number', inplace=True)
-  
+
+    sub = decoded_df2.iloc[cohort_inds,:]    
+    
+    time_labels={0: '4 hrs', 1: '10 hrs', 2: '20 hrs', 3: '25 hrs', 4: '49 hrs', 5: '73 hrs', 6: '168 hrs', 7: '337 hrs', 8: '500 hrs' }
+    
+    sub['time2hosp_binned']= pd.cut(
+    sub.time2hosp,
+    bins=[0,4,10,20,25,49,73,7*24+1,14*24+1,10000], 
+    labels=time_labels )  
+
+    sub['time2hosp_binned'] = pd.Categorical(sub.time2hosp_binned)
+    sub['time2hosp_binned'] = sub.time2hosp_binned.cat.codes
+
+    i=np.intersect1d( sub.cpsc_case_number, trn_case_nums ); 
+    j=np.intersect1d( sub.cpsc_case_number, tst_case_nums );
+
+    sub.set_index('cpsc_case_number', inplace=True)  
     k  = 'narrative'
     kk = 'mentioned_recurrent_falls' 
   
-    i=np.intersect1d( sub.cpsc_case_number, trn_case_nums ); 
-    j=np.intersect1d( sub.cpsc_case_number, tst_case_nums );
     print( len(i)+len(j), sub.shape  )
-    
-    sub1 = sub.loc[ i ]
-    sub2 = sub.loc[ j ]
+    subs={}
+    subs['trn'] = sub.loc[ i ]
+    subs['tst'] = sub.loc[ j ]
 
     # Recurrent falls
-    t='trn'
-    surv_pols[t] = pol.DataFrame(sub1).with_columns(pol.when(
-      pol.col(k).str.contains('PREV F') | 
-      pol.col(k).str.contains('RECURRENT F') | 
-      pol.col(k).str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))  
-    t='tst'
-    surv_pols[t] = pol.DataFrame(sub2).with_columns(pol.when(
-      pol.col(k).str.contains('PREV F') | 
-      pol.col(k).str.contains('RECURRENT F') | 
-      pol.col(k).str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))
-
-    return cohort_inds
+    for t in ['tst','trn']:
+        surv_pols[t] = pol.DataFrame(subs[t]).with_columns(pol.when(
+          pol.col(k).str.contains('PREV F') | 
+          pol.col(k).str.contains('RECURRENT F') | 
+          pol.col(k).str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))  
+    
+    return sub, i, j, cohort_inds
 
 # https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models/
 def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"):
@@ -327,58 +371,46 @@ def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"
 
 
 
-
-
-
 # =================================== main ===================================
 
-folder = '/kaggle/input/neiss-2023/'    
+# get preprocess dataframes and data splits
 if ( 'org_columns' in globals())==False:
+
+    surv_pols,indices,sentences,meta,embeddings={},{},{},{},{}    
+    folder = '/kaggle/input/neiss-2023/'    
+    
     decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data()
     
-import nltk
-nltk.download('punkt'); 
-sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')    
-get_cleaned_narratives()
+    import nltk
+    nltk.download('punkt'); 
+    sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')    
 
-decoded_df2['time2hosp']=0
-with mp.Pool(mp.cpu_count()) as pool:
-    decoded_df2['time2hosp'] = pool.map(get_time2hosp, decoded_df2['narrative_cleaned'] )
+    get_cleaned_narratives()            
+    get_time2hosp()    
+    sub, ii, jj, cohort_inds= get_meta_data()    
+ 
+    indices['trn']=ii
+    indices['tst']=jj
+    print(decoded_df2['narrated_dx'].shape)   
     
-# size of survival data
-print( (decoded_df2['time2hosp']>0 ).sum()/decoded_df2.shape[0] )    
-
-print( 'If models were to be developed, we may split into trn set of', len(trn_case_nums), 'samples and tst set of',
-    len(tst_case_nums), 'samples. \n\tOverlapped indices?', np.intersect1d( tst_case_nums, trn_case_nums ), '\n\n' )
-
-# consumer product safety commission
-surv_pols = {}
-if ( 'cohort_inds' in globals())==False:
-    cohort_inds= meta_data()
-    print(decoded_df2['narrated_dx'].shape)
-    
-
-sentences,meta,embeddings={},{},{}
-
+# embeddings 
 t='tst'
-if os.path.isfile( f"../input/embeddings_{t}.pkl"):
+if 1:#os.path.isfile( f"../input/embeddings_{t}.pkl"):
     for t in ['trn','tst']:
-        with open(  f"embeddings_{t}.pkl", 'rb') as handle:
+        with open(  f"../input/neiss/embeddings_{t}.pkl", 'rb') as handle:
             meta = pickle.load(handle)    
         embeddings[t]= meta["embeddings"]
         sentences[t] = meta["sentences"]    
 else:
     for t in ['tst','trn']:
         sentences[t] = list( surv_pols[t].to_pandas()["narrative_cleaned"])  
-        embeddings[t]= get_embeddings(sentences[t])   
+        embeddings[t]= get_embeddings(sentences[t])           
         
         # Save
-        meta[t] = {
-            "sentences": sentences,
-            "embeddings": embeddings
+        meta = {
+            'indices': indices[t],
+            "sentences": sentences[t],
+            "embeddings": embeddings[t]
         }
         with open( f"embeddings_{t}.pkl", 'wb') as handle:
-            pickle.dump(meta[t], handle)        
-
-
-
+            pickle.dump(meta, handle)        
