@@ -12,7 +12,7 @@ from pathlib import Path
 import textwrap
 
 import nltk
-nltk.download('punkt')
+#nltk.download('punkt'); 
 sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
 import multiprocessing as mp
