@@ -96,32 +96,107 @@ def get_data():
     for col in mapping.keys():
         if col != 'disposition':
             decoded_df[col] = decoded_df[col].map(mapping[col])        
+
+  
+    tst_case_nums = np.setdiff1d( decoded_df2.cpsc_case_number, df.cpsc_case_number )
+    trn_case_nums = np.setdiff1d( decoded_df2.cpsc_case_number, tst_case_nums )
     
-    return decoded_df, decoded_df2, org_columns
+    return decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums
 
 if ( 'org_columns' in globals())==False:
-  decoded_df, decoded_df2, org_columns = get_data()
+    decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data()
 
-tst_case_nums = np.setdiff1d( decoded_df2.cpsc_case_number, df.cpsc_case_number )
-trn_case_nums = np.setdiff1d( decoded_df2.cpsc_case_number, tst_case_nums )
+
+def get_time2hosp(r):    
+    t2hosp = -1      
+    r = r.upper()           
+    if (r.find('SEVERAL HOURS AGO')>=0) | (r.find('COUPLE OF HOURS AGO')>=0) | (r.find('MULTIPLE HOURS AGO')>=0) | (r.find('COUPLE HOURS AGO')>=0) | (r.find('FEW HOURS AGO')>=0) | (r.find('SEV. HOURS AGO')>=0):
+        t2hosp=6/24
+    elif (r.find('SEVERAL DAYS AGO')>=0) | (r.find('COUPLE OF DAYS AGO')>=0) | (r.find('MULTIPLE DAYS AGO')>=0) | (r.find('COUPLE DAYS AGO')>=0) | (r.find('FEW DAYS AGO')>=0) | (r.find('SEV. DAYS AGO')>=0):
+        t2hosp=3
+    elif r.find('2 WEEKS AGO')>=0:
+        t2hosp=14
+    elif r.find('A WEEK AGO')>=0:
+        t2hosp=7        
+    elif r.find('MONTH AGO')>=0:
+        t2hosp=30        
+    elif r.find('TODAY')>=0:
+        t2hosp=1/2                
+    elif r.find('YESTERDAY')>=0:        
+        t2hosp=1
+    elif r.find('PREVIOUS DAY')>=0:        
+        t2hosp=1
+    elif r.find('PREV DAY')>=0:        
+        t2hosp=1    
+    elif r.find('YESTERDAY MORNING')>=0:
+        t2hosp=1
+    elif r.find('MORNING')>=0:
+        t2hosp=6/24
+    elif r.find('THIS AFTERNOON')>=0:
+        t2hosp=6/24
+    elif r.find('LAST NIGHT')>=0:
+        t2hosp=18/24
+    else:    
+        s0 = r.find('HOURS AGO')  
+        if s0==-1:
+            s0 = r.find('HOUR AGO')                
+        if s0==-1: # not hour
+            s1 = r.find('DAYS AGO')
+
+        if s0>=0: # hours =============
+            nh = r[s0-2:s0]
+            try:
+                o=np.float64(nh)/24
+                t2hosp=o
+            except:
+                try:
+                    nh = r[s0-1:s0]
+                    o=np.float64(nh)/24
+                    t2hosp=o
+                except:
+                    if r.find('HOUR AGO') >0:
+                        t2hosp=1/24
+                    else:
+                        t2hosp=6/24                            
+        elif s1>=0: # days
+            st= r[s1-2:s1].replace(' ','')
+            try:
+                t2hosp=np.int8(st)
+            except:
+                try:
+                    st= r[s1-1:s1]
+                    t2hosp=np.int8(st)
+                except:                
+                    t2hosp=1 # days  
+    return t2hosp 
+
+decoded_df2['time2hosp']=0
+with mp.Pool(mp.cpu_count()) as pool:
+    decoded_df2['time2hosp'] = pool.map(get_time2hosp, decoded_df2['narrative_cleaned'] )
+    
+# size of survival data
+print( (decoded_df2['time2hosp']>0 ).sum()/decoded_df2.shape[0] )    
 
 print( 'If models were to be developed, we may split into trn set of', len(trn_case_nums), 'samples and tst set of',
     len(tst_case_nums), 'samples. \n\tOverlapped indices?', np.intersect1d( tst_case_nums, trn_case_nums ), '\n\n' )
- 
-i=np.intersect1d( sub.cpsc_case_number, trn_case_nums ); 
-j=np.intersect1d( sub.cpsc_case_number, tst_case_nums );
-print( len(i)+len(j), sub.shape  )
 
-sub.set_index('cpsc_case_number', inplace=True)
 
 # consumer product safety commission
 
 surv_pols = {}
 
 def meta_data():
+    cohort_inds = np.where( decoded_df2.time2hosp > 0 )[0]  
+    sub = decoded_df2.iloc[cohort_inds,:]
+    sub.set_index('cpsc_case_number', inplace=True)
+  
     k  = 'narrative'
     kk = 'mentioned_recurrent_falls' 
-
+  
+    i=np.intersect1d( sub.cpsc_case_number, trn_case_nums ); 
+    j=np.intersect1d( sub.cpsc_case_number, tst_case_nums );
+    print( len(i)+len(j), sub.shape  )
+    
     sub1 = sub.loc[ i ]
     sub2 = sub.loc[ j ]
 
@@ -137,7 +212,11 @@ def meta_data():
       pol.col(k).str.contains('RECURRENT F') | 
       pol.col("narrative").str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))
 
-meta_data()
+    return cohort_inds
+
+
+if ( 'cohort_inds' in globals())==False:
+    cohort_inds= meta_data()
 
 # https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models/
 def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"):
