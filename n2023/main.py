@@ -97,10 +97,10 @@ def get_data():
         if col != 'disposition':
             decoded_df[col] = decoded_df[col].map(mapping[col])        
     
-    return decoded_df, decoded_df2
+    return decoded_df, decoded_df2, org_columns
 
 if ( 'org_columns' in globals())==False:
-  decoded_df, decoded_df2 = get_data()
+  decoded_df, decoded_df2, org_columns = get_data()
 
 tst_case_nums = np.setdiff1d( decoded_df2.cpsc_case_number, df.cpsc_case_number )
 trn_case_nums = np.setdiff1d( decoded_df2.cpsc_case_number, tst_case_nums )
@@ -148,7 +148,6 @@ def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"
 
 sentences,meta,embeddings={},{},{}
 
-t='trn'
 if os.path.isfile( f"../input/embeddings_{t}.pkl"):
     for t in ['trn','tst']:
         with open(  f"embeddings_{t}.pkl", 'rb') as handle:
