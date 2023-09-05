@@ -42,9 +42,13 @@ from keras.models import Sequential
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+# =================================== defaults ===================================
+
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
+os.environ['TOKENIZERS_PARALLELISM']= "false"
+
 
 
 # =================================== define functions ===================================
