@@ -144,7 +144,7 @@ def strip_basic_info( r ):
 
 def clean_narrative(text0):
 
-  abbr_terms = {
+    abbr_terms = {
       "&": "and",
       "***": "",
       ">>": "DX",
@@ -189,7 +189,8 @@ def clean_narrative(text0):
       "sah": "subarachnoid hemorrhage", "sdh": "acute subdural hematoma","sts": "sit-to-stand", "uti": "urinary tract infection",
       "w/": "with", "w":"with",   
       "w/o": "without",
-      "wks": "weeks" }  
+      "wks": "weeks" 
+    }  
     
     # rid of typos
     text = rid_typos(text0)
