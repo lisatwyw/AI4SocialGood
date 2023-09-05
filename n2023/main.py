@@ -50,6 +50,9 @@ pd.set_option('display.width', None)
 os.environ['TOKENIZERS_PARALLELISM']= "false"
 
 
+SEED=101
+np.random.seed(SEED)
+tf.random.set_seed(SEED)
 
 # =================================== define functions ===================================
 
@@ -72,20 +75,13 @@ def get_data():
     df2['year'] = df2.treatment_date.dt.year
 
     '''
-    1. White: A person having origins in any of the Europe, Middle East, or North Africa.
-    
-    2. Black/African American: A person having origins in any of the black racial groups of Africa.
-    
-    4. Asian: A person having origins in any of the original peoples of the Far East, Southeast Asia, or the Indian subcontinent
-    
-    5. American Indian/Alaska Native: A person having origins in any of the original peoples of North and South America (including Central America), and who maintains tribal affiliation or community attachment.
-    
-    6. Native Hawaiian/Pacific Islander: A person having origins in any of the original peoples of Hawaii, Guam, Samoa, or other Pacific Islands.
-    
+    1. White: A person having origins in any of the Europe, Middle East, or North Africa.    
+    2. Black/African American: A person having origins in any of the black racial groups of Africa.    
+    4. Asian: A person having origins in any of the original peoples of the Far East, Southeast Asia, or the Indian subcontinent    
+    5. American Indian/Alaska Native: A person having origins in any of the original peoples of North and South America (including Central America), and who maintains tribal affiliation or community attachment.    
+    6. Native Hawaiian/Pacific Islander: A person having origins in any of the original peoples of Hawaii, Guam, Samoa, or other Pacific Islands.   
     7. White Hispanic 1 Race=1    
-    8. Black Hispanic 1 Race=2
-    
-    
+    8. Black Hispanic 1 Race=2        
     3. ED record indicates more than one race (e.g., multiracial, biracial)    
     '''
     
@@ -130,7 +126,6 @@ def get_data():
     return decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums
 
 
-
 def rid_typos( r ):
     r=r.replace('TWO','2').replace('TWPO','2').replace('TW D','2 D')
     r=r.replace('FIOUR DAYS AGO', 'FOUR DAYS AGO').replace('6X DAYS','6 DAYS').replace('4 FDAYS','4 DAYS').replace('FOOUR DAYS','4 DAYS')
@@ -141,9 +136,9 @@ def rid_typos( r ):
     r=r.replace('2HOURS','2 HOURS').replace('1HOUR','1 HOUR').replace('AN HOUR','1 HOUR').replace('FERW HOUR','FEW HOUR')
     r=r.replace('2,DAYS', '2 DAYS').replace('SEV DAYS', 'SEVERAL DAYS')
     r=r.replace('COUPLEOF','COUPLE OF').replace('A DAY','1 DAY').replace('HALF HOUR','1 HOUR') # round to 1 hour
-    r=r.replace('   ',' ').replace('  ',' ').replace('DAYSA GO', 'DAYS AGO')
+    r=r.replace('   ',' ').replace('  ',' ').replace('DAYSA GO', 'DAYS AGO').replace('witho ','with')
     r=r.replace('LAST MIGHT AND', 'LAST NIGHT AND').replace('AT NH','AT NURSING HOME').replace('BAKC', 'BACK')
-    r=r.replace('DXZ','DX').replace('10NIS', 'TENNIS').replace('N/S INJURY', 'NOT SIGNIFICANT INJURY').replace('*','')
+    r=r.replace('DXZ','DX').replace('10NIS', 'TENNIS').replace('N/S INJURY', 'NOT SIGNIFICANT INJURY').replace('***','*').replace('**','*').replace('>>>','>').replace('>>','>')
     return r
 
 def strip_basic_info( r ):
@@ -152,11 +147,15 @@ def strip_basic_info( r ):
               'Y/O MALE' , 'Y/O M', 'OLD FE', 'OLD MALE ', 'FEMALE', 'MALE']:
         try:
             r = r.split(a[:10])[1]
-            #r = r[:2].replace(' ','').replace(', ', '').replace(',', '').replace('-', '').replace('#', '').replace('.', '') + r[2:]
             break
         except:
             pass
-    parts=r.split('DX')
+    if r.find('DX')>-1:
+        parts=r.split('DX')
+    elif r.find('>')>-1:
+        parts=r.split('>')
+    else:
+        parts=r.split('*')
     try:
         dx = parts[1]
     except:
@@ -168,9 +167,7 @@ def strip_basic_info( r ):
 def clean_narrative(text0):
 
     abbr_terms = {
-      "&": "and",
-      "***": "",      
-      ">>": "DX",
+      "&": "and",            
       "@": "at",
       "abd": "abdomen",
       "af": "accidental fall",
@@ -245,10 +242,8 @@ def get_cleaned_narratives():
     B = [ r[1] for r in res ]
 
     decoded_df2['narrative_cleaned']= A
-    decoded_df2['narrated_dx'] = B    
+    decoded_df2['narrated_dx'] = B        
     
-    
-
 def _get_time2hosp(r):  # in hours   
     t2hosp = -1      
     r = r.upper()           
@@ -368,8 +363,6 @@ def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"
     model = SentenceTransformer(pretrained)
     embeddings = model.encode(sentences)
     return embeddings
-
-
 
 
 
