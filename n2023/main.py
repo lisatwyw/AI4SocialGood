@@ -1,4 +1,3 @@
-
 import json, os
 import pandas as pd
 
@@ -35,7 +34,6 @@ from tqdm import tqdm
 from PIL import Image
 from functools import wraps
 
-from sklearn.manifold import TSNE
 #from transformers import AutoTokenizer, FeatureExtractionPipeline, pipeline
 
 import random, math
@@ -121,24 +119,24 @@ sub.set_index('cpsc_case_number', inplace=True)
 surv_pols = {}
 
 def meta_data():
-  k  = 'narrative'
-  kk = 'mentioned_recurrent_falls' 
- 
-  sub1 = sub.loc[ i ]
-  sub2 = sub.loc[ j ]
+    k  = 'narrative'
+    kk = 'mentioned_recurrent_falls' 
 
-  # Recurrent falls
-  t='trn'
-  surv_pols[t] = pol.DataFrame(sub1).with_columns(pol.when(
+    sub1 = sub.loc[ i ]
+    sub2 = sub.loc[ j ]
+
+    # Recurrent falls
+    t='trn'
+    surv_pols[t] = pol.DataFrame(sub1).with_columns(pol.when(
       pol.col(k).str.contains('PREV F') | 
       pol.col(k).str.contains('RECURRENT F') | 
       pol.col("narrative").str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))  
-  t='tst'
-  surv_pols[t] = pol.DataFrame(sub2).with_columns(pol.when(
+    t='tst'
+    surv_pols[t] = pol.DataFrame(sub2).with_columns(pol.when(
       pol.col(k).str.contains('PREV F') | 
       pol.col(k).str.contains('RECURRENT F') | 
       pol.col("narrative").str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))
-  
+
 meta_data()
 
 # https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models/
