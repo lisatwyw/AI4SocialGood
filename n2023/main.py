@@ -106,6 +106,124 @@ def get_data():
 if ( 'org_columns' in globals())==False:
     decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data()
 
+ 
+
+
+
+def rid_typos( r ):
+    r=r.replace('TWO','2').replace('TWPO','2').replace('TW D','2 D')
+    r=r.replace('FIOUR DAYS AGO', 'FOUR DAYS AGO').replace('6X DAYS','6 DAYS').replace('4 FDAYS','4 DAYS').replace('FOOUR DAYS','4 DAYS')
+    r=r.replace('SIX','6').replace('SEVEN','7').replace('THREE','3').replace('ONE','1').replace('FOUR','4').replace('FIVE','5').replace(')','')
+    r=r.replace('TEN','10').replace('NINE','9').replace('24 HOURS AGO','1 DAY AGO').replace('EIGHT','8').replace('E DAYS AGO','8').replace('A DAY','1 DAY')
+    r=r.replace('TWELVE','12').replace('HRS', 'HOURS').replace('HR AGO', 'HOUR AGO').replace(' F DAYS AGO', ' FEW DAYS AGO')
+    r=r.replace('SEVERALDAYS', 'SEVERAL DAYS').replace('2 AND A HALF','3').replace('2 AND HALF','3').replace('5 DADAYS','5 DAYS')
+    r=r.replace('2HOURS','2 HOURS').replace('1HOUR','1 HOUR').replace('AN HOUR','1 HOUR').replace('FERW HOUR','FEW HOUR')
+    r=r.replace('2,DAYS', '2 DAYS').replace('SEV DAYS', 'SEVERAL DAYS')
+    r=r.replace('COUPLEOF','COUPLE OF').replace('A DAY','1 DAY').replace('HALF HOUR','1 HOUR') # round to 1 hour
+    r=r.replace('   ',' ').replace('  ',' ').replace('DAYSA GO', 'DAYS AGO')
+    r=r.replace('LAST MIGHT AND', 'LAST NIGHT AND').replace('AT NH','AT NURSING HOME').replace('BAKC', 'BACK')
+    r=r.replace('DXZ','DX').replace('10NIS', 'TENNIS').replace('N/S INJURY', 'NOT SIGNIFICANT INJURY')
+    return r
+
+def strip_basic_info( r ):
+    for a in ['YOF', 'YO FEMALE', 'Y/O FEMALE', 'YO F', 'YF', 'Y O F', 'YOM', ' YWF',
+              'YO MALE', 'YO M', 'Y O M', 'YM', 'Y/O WM',
+              'Y/O MALE' , 'Y/O M', 'OLD FE', 'OLD MALE ', 'FEMALE', 'MALE']:
+        try:
+            r = r.split(a[:10])[1]
+            #r = r[:2].replace(' ','').replace(', ', '').replace(',', '').replace('-', '').replace('#', '').replace('.', '') + r[2:]
+            break
+        except:
+            pass
+    parts=r.split('DX')
+    try:
+        dx = parts[1]
+    except:
+        dx = '' # assumed not narrated 
+    return parts[0], dx
+
+def clean_narrative(text0):
+
+  abbr_terms = {
+      "&": "and",
+      "***": "",
+      ">>": "DX",
+      "@": "at",
+      "abd": "abdomen",
+      "af": "accidental fall",
+      "afib": "atrial fibrillation",
+      "aki": "acute kidney injury",
+      "am": "morning",
+      "a.m.": "morning",
+      "ams": "altered mental status",    
+      "bac": "blood alcohol content",
+      "bal": "blood alcohol level,",
+      "biba": "brought in by ambulance",
+      "c/o": "complains of",
+      "chi": "closed-head injury",    # "clsd": "closed", 
+      "cpk": "creatine phosphokinase", 
+      "cva": "cerebral vascular accident",
+      "dx": "clinical diagnosis",    #"ecf": "extended-care facility", # "er": "emergency room",
+      "etoh": "ethyl alcohol", #"eval": "evaluation", "fd": "fall detected",
+      "fx": "fracture",
+      "fxs": "fractures",    # "glf": "ground level fall", "h/o": "history of", "htn": "hypertension",
+      "hx": "history of",
+      "inj": "injury",   # "inr": "international normalized ratio",
+      "intox": "intoxication",    
+      "loc": "loss of consciousness",
+      "lt": "left",
+      "mech": "mechanical",
+      "mult": "multiple",
+      "n.h.": "nursing home", #    "nh": "nursing home",
+      "p/w": "presents with",
+      "pm": "afternoon",    # "pt": "patient", # overlaps with physical therapist assistant 
+      "p.m.": "afternoon",
+      'prev': "previous",
+      "pta": "prior to arrival",
+      "pts": "patient's", #    "px": "physical examination", # not "procedure",
+      "r": "right", "l": "left",
+      "r/o": "rules out",
+      "rt": "right",    #"s'd&f": "slipped and fell", "s/p": "after", "t'd&f": "tripped and fell", "tr": "trauma",
+      "rt.": "right",
+      "lt.": "left",
+      "sah": "subarachnoid hemorrhage", "sdh": "acute subdural hematoma","sts": "sit-to-stand", "uti": "urinary tract infection",
+      "w/": "with", "w":"with",   
+      "w/o": "without",
+      "wks": "weeks" }  
+    
+    # rid of typos
+    text = rid_typos(text0)
+    text, dx = strip_basic_info( text )
+        
+    # lowercase everything
+    text = text.lower()  
+    
+    # Ack: https://www.drivendata.org/competitions/217/cdc-fall-narratives/community-code/50/  
+    #
+    # map abbrevations back to English words 
+    for term, replacement in abbr_terms.items():
+        if term == "@" or term == ">>" or term == "&" or term == "***":
+            pattern = fr"({re.escape(term)})"
+            text = re.sub(pattern, f" {replacement} ", text) # force spaces around replacement            
+        else:
+            pattern = fr"(?<!-)\b({re.escape(term)})\b(?!-)"
+            text = re.sub(pattern, replacement, text )
+    
+    sentences = sent_tokenizer.tokenize(text)
+    sentences = [s.capitalize() for s in sentences]
+    return " ".join(sentences), dx
+
+def get_cleaned_narratives():
+  with mp.Pool(mp.cpu_count()) as pool:
+      res =  pool.map(clean_narrative, decoded_df2['narrative'] )     
+      
+  A = [ r[0] for r in res ]
+  B = [ r[1] for r in res ]
+  
+  decoded_df2['narrative_cleaned']= A
+  decoded_df2['narrated_dx'] = B     
+  
+get_cleaned_narratives()
 
 def get_time2hosp(r):    
     t2hosp = -1      
@@ -205,12 +323,12 @@ def meta_data():
     surv_pols[t] = pol.DataFrame(sub1).with_columns(pol.when(
       pol.col(k).str.contains('PREV F') | 
       pol.col(k).str.contains('RECURRENT F') | 
-      pol.col("narrative").str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))  
+      pol.col(k).str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))  
     t='tst'
     surv_pols[t] = pol.DataFrame(sub2).with_columns(pol.when(
       pol.col(k).str.contains('PREV F') | 
       pol.col(k).str.contains('RECURRENT F') | 
-      pol.col("narrative").str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))
+      pol.col(k).str.contains(r'FALLEN * TIMES')).then(1).otherwise(0).alias( kk ))
 
     return cohort_inds
 
