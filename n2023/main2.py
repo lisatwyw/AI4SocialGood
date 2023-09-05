@@ -1,4 +1,4 @@
-import json, os
+ import json, os
 import pandas as pd
 
 import os, sys, pickle, json
@@ -48,7 +48,7 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 
 
-
+# =================================== define functions ===================================
 
 def get_data():
     with Path( folder + "variable_mapping.json").open("r") as f:
@@ -137,9 +137,6 @@ def strip_basic_info( r ):
 
 
 def clean_narrative(text0):
-    import nltk
-    nltk.download('punkt'); 
-    sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
     abbr_terms = {
       "&": "and",
@@ -219,7 +216,7 @@ def get_cleaned_narratives():
     B = [ r[1] for r in res ]
 
     decoded_df2['narrative_cleaned']= A
-    decoded_df2['narrated_dx'] = B     
+    decoded_df2['narrated_dx'] = B    
     
     
 
@@ -333,12 +330,15 @@ def get_embeddings(sentences, pretrained="paraphrase-multilingual-mpnet-base-v2"
 
 
 
-
+# =================================== main ===================================
 
 folder = '/kaggle/input/neiss-2023/'    
 if ( 'org_columns' in globals())==False:
     decoded_df, decoded_df2, org_columns, trn_case_nums, tst_case_nums = get_data()
     
+import nltk
+nltk.download('punkt'); 
+sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')    
 get_cleaned_narratives()
 
 decoded_df2['time2hosp']=0
@@ -355,6 +355,8 @@ print( 'If models were to be developed, we may split into trn set of', len(trn_c
 surv_pols = {}
 if ( 'cohort_inds' in globals())==False:
     cohort_inds= meta_data()
+    print(decoded_df2['narrated_dx'].shape)
+    
 
 sentences,meta,embeddings={},{},{}
 
@@ -369,6 +371,7 @@ else:
     for t in ['tst','trn']:
         sentences[t] = list( surv_pols[t].to_pandas()["narrative_cleaned"])  
         embeddings[t]= get_embeddings(sentences[t])   
+        
         # Save
         meta[t] = {
             "sentences": sentences,
