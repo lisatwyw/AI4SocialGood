@@ -51,6 +51,7 @@ os.environ['TOKENIZERS_PARALLELISM']= "false"
 
 
 SEED=101
+import tensorflow as tf
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
 
