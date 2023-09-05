@@ -358,6 +358,7 @@ if ( 'cohort_inds' in globals())==False:
 
 sentences,meta,embeddings={},{},{}
 
+t='tst'
 if os.path.isfile( f"../input/embeddings_{t}.pkl"):
     for t in ['trn','tst']:
         with open(  f"embeddings_{t}.pkl", 'rb') as handle:
