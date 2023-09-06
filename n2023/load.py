@@ -1,5 +1,3 @@
-%%time
-
 import json, os
 import pandas as pd
 
