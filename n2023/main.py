@@ -1,3 +1,5 @@
+%%time
+
 import json, os
 import pandas as pd
 
@@ -234,8 +236,17 @@ def clean_narrative(text0):
         pattern = fr"(?<!-)\b({re.escape(term)})\b(?!-)"
         text = re.sub( f' {pattern} ', f' {replacement} ', text )
 
-    return lemmatizer(text), dx
-
+    if DEBUG==0:
+        '''
+        lemmatization: 
+        - nursing home stays same
+        - turned -> turn
+        - sitting on chair, sit on chair
+        - reaching -> reach 
+        - striking -> strike  
+        ''';
+        text = lemmatizer(text)
+    return text, dx
 
     sentences = sent_tokenizer.tokenize(text)
     sentences = [s.capitalize() for s in sentences]
@@ -351,6 +362,7 @@ def get_meta_data( useAll=True ):
     i=np.intersect1d( sub.cpsc_case_number, trn_case_nums );
     j=np.intersect1d( sub.cpsc_case_number, tst_case_nums );
 
+    sub['cpsc_id']=sub['cpsc_case_number'].copy()
     sub.set_index('cpsc_case_number', inplace=True)
     k  = 'narrative'
     kk = 'mentioned_recurrent_falls'
@@ -374,9 +386,11 @@ def get_meta_data( useAll=True ):
 
 # =================================== main ===================================
 
+
 # get preprocess dataframes and data splits
 if ( 'org_columns' in globals())==False:
 
+    DEBUG=0        
     surv_pols,indices,sentences,meta,embeddings={},{},{},{},{}
 
     try:
@@ -392,29 +406,17 @@ if ( 'org_columns' in globals())==False:
     import spacy
     os.system("python -m spacy download en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
-
-if 1:
     get_cleaned_narratives()
     get_time2hosp()
-    sub, ii, jj, cohort_inds = get_meta_data()
+
+if DEBUG==0:
+    sub, ii, jj, cohort_inds = get_meta_data( useAll=DEBUG==0 )
     indices['trn']=ii
     indices['tst']=jj
     print(decoded_df2['narrated_dx'].shape)
 else:
-
-  '''
-  lemmatization: 
-
-  - nursing home stays same
-  - turned -> turn
-  - sitting on chair, sit on chair
-  - reaching -> reach 
-  - striking -> strike  
-  ''';
-
-  m = decoded_df2.iloc[::50000,:].copy()
-  with mp.Pool(mp.cpu_count()) as pool:
-    r = pool.map(clean_narrative, m['narrative'] )
-  for a,b in zip(m['narrative'], r):
-    print(a, '\n', b[0], '\n')
-    
+    m = decoded_df2.iloc[::50000,:].copy()
+    with mp.Pool(mp.cpu_count()) as pool:
+        r = pool.map(clean_narrative, m['narrative'] )
+    for a,b in zip(m['narrative'], r):
+        print(a, '\n', b[0], '\n')    
