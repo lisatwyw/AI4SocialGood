@@ -108,6 +108,10 @@ def get_data( folder='../input/neiss-2023/' ):
     bins=[0,65,75,85,95,150],
     labels=["1: 65 or under", "2: 65-74", "3: 74-85", "4: 85-94", "5: 95+"],
     )
+  
+    df2['age_cate'] = pd.Categorical(df2.age_cate)
+    df2['age_cate_binned'] = df2.age_cate.cat.codes
+  
     # drop the 3 cases of unknown sex and then map codes to English words
     df2 = df2[df2.sex != 0]
 
