@@ -388,11 +388,10 @@ if ( 'org_columns' in globals())==False:
     from transformers import AutoTokenizer, AutoModelForMaskedLM
     nltk.download('punkt');
     sent_tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-    sent_tokenizer = AutoTokenizer.from_pretrained("yikuan8/Clinical-Longformer")
+    #sent_tokenizer = AutoTokenizer.from_pretrained("yikuan8/Clinical-Longformer")
     import spacy
     os.system("python -m spacy download en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
-
 
 if 1:
     get_cleaned_narratives()
