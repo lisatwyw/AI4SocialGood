@@ -2,4 +2,4 @@ NAN, 0.581, 0.5003, with SGD, narrative
 NAN, 0.652, 0.501, with AdamW , narrative
 NAN, 0.614, 0.501, with AdamW, narrative
 NAN, 0.660, 0.502, with AdamW, both 
-.751, 0.649 0.507, XGBoost, both 
+0.751, 0.649, 0.507, XGBoost, both 
