@@ -115,10 +115,7 @@ if tid<4:
         plt.plot(model.history['lr'])
     except:
         pass
-
-    y_preds = model.predict( val[0] )
-    y_tst_preds = model.predict( tst[0])
-
+ 
 
 assert XX.shape[0] == Y['trn'].shape[0] 
 assert val[0].shape[0] == val[1].shape[0] 
