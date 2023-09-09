@@ -161,5 +161,40 @@ if tid==4:
         eval_set=[ val ],   
         verbose=10)
 
-y_preds =  clf_xgb.predict_proba( val[0] )
+y_trn_preds =  clf_xgb.predict_proba(XX )
+y_val_preds =  clf_xgb.predict_proba( val[0] )
 y_tst_preds = clf_xgb.predict_proba( tst[0] )
+
+if tid==4:
+  y_trn_preds = np.argmax( y_trn_preds,1 )
+  y_val_preds= np.argmax( y_val_preds,1 )
+  y_tst_preds = np.argmax( y_tst_preds,1 )
+
+if 1:
+  from sklearn.metrics import *
+  conf = confusion_matrix( y_trn_preds, Y['trn'] )
+  tn, fp, fn, tp = conf.ravel()
+  #print( t, tn, fp, fn, tp )
+  print(conf )
+
+  conf = confusion_matrix( y_val_preds, Y['val'] )
+  tn, fp, fn, tp = conf.ravel()
+  #print( t, tn, fp, fn, tp )
+  print(conf )
+  conf = confusion_matrix( y_tst_preds, Y['tst'] )
+  tn, fp, fn, tp = conf.ravel()
+  #print( t, tn, fp, fn, tp )
+  print(conf )
+  from sklearn.metrics import *  # with AdamW
+  print( 'trn', roc_auc_score( y_trn_preds, Y['trn'], average='macro') )
+  print( 'val', roc_auc_score( y_val_preds, Y['val'], average='macro') )
+  print( 'tst', roc_auc_score( y_tst_preds, Y['tst'], average='macro') )
+  
+  try:
+    if tid<4:
+      fig=px.line( model.feature_importances_ )
+      fig.show()
+  except:
+      pass
+
+  
