@@ -1,6 +1,3 @@
-data_id = 3  # both narratives and demographic 
-tid = 4   # xgboost 
-
 if data_id==1: # narratives only
   XX= X['trn']
   val = (X['val'],Y['val'])
@@ -21,13 +18,10 @@ elif data_id==3: # both
   val = (np.hstack( (X['val'], X2['val'])),Y['val'])
   tst = (np.hstack( (X['tst'], X2['tst'])),Y['tst'])
 
-
-
-
 if tid<4:
-  ## https://stackoverflow.com/questions/65040696/spacy-aggressive-lemmatization-and-removing-unexpected-words
+  # https://stackoverflow.com/questions/65040696/spacy-aggressive-lemmatization-and-removing-unexpected-words
   # accuracy_metric
-  #%matplotlib inline
+  
   #plt.hist( np.abs(y_preds - Y_val[:,0])  );
   
   from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor
