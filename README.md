@@ -1,6 +1,6 @@
 # AI4SocialGood
 
-1. Society
+1. Humanity issues
    - AI in human trafficking         /6
    - Web-scraping data on suicide    /6
    - ASL recognition                 /8 [[private]](https://colab.research.google.com/drive/1HZkHXPkgasQ7OJSyMHTsdlp33y6TYkpw?authuser=2#scrollTo=OToQM-BWQ9T2)
@@ -13,5 +13,6 @@
    - Fall prevention in seniors      /8-9 [[private]](https://docs.google.com/document/d/1dtgnINC1BMY-YDRbd82jQMkAmXDht9QX8xd9DuGvCVw/)
    - Age regression using meth-data  /8-9
    - Indigenous Peoples              /8
+   - Climate changes & elders        /9
 
   
