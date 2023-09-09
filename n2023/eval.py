@@ -6,7 +6,7 @@ if data_id==1: # narratives only
 elif data_id==2: # non-narratives
   XX = X2[t]
   val = (X2['val'],Y['val'])
-  tst = (X ['tst'],Y['tst'])
+  tst = (X2['tst'],Y['tst'])
   tabnet_params.update({"grouped_features": [ list(np.arange(X2[t].shape[1] )) ]} )
 
 elif data_id==3: # both
