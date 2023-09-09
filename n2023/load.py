@@ -578,3 +578,22 @@ def get_meta_data( decoded_df2, useAll=True ):
 sub, case_ids, cohort_inds = get_meta_data( decoded_df2, useAll=1 )
 
 print('sub', sub['narrative_dx'].shape) 
+
+
+def get_X_E():
+    surv_pols, E={},{}        
+    for t in ['trn' ,'tst']:
+        p = sub.loc[ case_ids[t] ].drop_duplicates( 'cpsc_id')
+        surv_pols[t] = pol.DataFrame(p)
+        tt= p['index'].values         
+        E[ t ] = embeddings[ tt,: ]        
+    return surv_pols, E
+  
+surv_pols, E = get_X_E()
+
+t='trn' 
+for i,r in enumerate(surv_pols[t].filter( pol.col('time2hosp')>21 ).sample(10).iter_rows()):
+    print(i, r[2], '\n\n', r[30], '\n\tBody:', r[13], '\n\tNarrativeDx:',r[-9], '\n\tPolarity:', r[-8],'\n\tSubjectivity:', r[-7], '\n\tt2e:', r[-6] )
+
+print( 'Variables:\n\n surv_pols[t] polar, E[t], sub, case_ids, cohort_inds' ) 
+  
