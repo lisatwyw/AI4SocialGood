@@ -48,6 +48,7 @@ if tid<4:
           torch.cuda.manual_seed_all(seed_value)
           torch.backends.cudnn.deterministic = True
           torch.backends.cudnn.benchmark = False
+        
   seed_everything(SEED)
   SCHEDULER_MIN_LR = 1e-6
   SCHEDULER_FACTOR = 0.9
@@ -98,9 +99,9 @@ if tid<4:
     if tid==3: # both
       tabnet_params.update({#"n_shared":3, "n_independent":3,"cat_idxs": cat_idxs, 
                             "grouped_features": [ list(np.arange(0,nf1)), list(np.arange(nf1,nf1+nf2 )) ]} )
-      
    
     model = TabNetClassifier(**tabnet_params)
+    
     hist = model.fit(XX,Y['trn'],
       eval_set= [val],
       eval_metric = ['balanced_accuracy'], # balanced_accuracy, Gini
@@ -143,7 +144,7 @@ if tid==4:
     min_child_weight=10, # the minimum sum of instance weight needed in a leaf, related to min no. instances needed in a node; larger values avoid over-fitting.
     max_delta_step=0,
     subsample=0.5,
-    colsample_bytree=1, # lower avoids overfit colsample_bytree
+    colsample_bytree=.5, # lower avoids overfit colsample_bytree
     colsample_bylevel=1,
     colsample_bynode=1,
     reg_alpha=0,
