@@ -1,4 +1,3 @@
-
 import multiprocessing as mp
 import re
 
@@ -56,6 +55,7 @@ except:
             folder = ''
     except:
         IS_INTERACTIVE = 0
+
 
 mode = 'publish' if IS_INTERACTIVE else 'demo'
 print( 'Running in interative mode?', IS_INTERACTIVE, '(0=No | 1=Kaggle | 2=Colab)\n\nRunning mode:', mode, folder )
@@ -479,10 +479,8 @@ else:
     
     v=20; decoded_df2.iloc[:,v]=decoded_df2.iloc[:,v].fillna('No/Unk')   
     v=15; decoded_df2.iloc[:,v]=decoded_df2.iloc[:,v].fillna('87 - NOT STATED/UNK')
-    decoded_df2.iloc[:,v].unique() 
-
-
- 
+    print( v, decoded_df2.iloc[:,v].unique () ) 
+  
 def get_time2hosp( decoded_df2 ):
     decoded_df2['time2hosp']=0
     with mp.Pool(mp.cpu_count()) as pool:
