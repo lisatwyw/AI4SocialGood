@@ -63,9 +63,9 @@ print( 'Running in interative mode?', IS_INTERACTIVE, '(0=No | 1=Kaggle | 2=Cola
 try:
      Path( folder + "variable_mapping.json").open("r")
 except:
-    if IS_INTERACTIVE==2:
-        !unzip /content/drive/MyDrive/datasets/neiss-2023.zip # unzip if not found
-        !unzip /content/drive/MyDrive/datasets/neiss-2013-2022-surv-embeddings.zip # unzip if not found
+    # if IS_INTERACTIVE==2:
+    #    !unzip /content/drive/MyDrive/datasets/neiss-2023.zip # unzip if not found
+    #    !unzip /content/drive/MyDrive/datasets/neiss-2013-2022-surv-embeddings.zip # unzip if not found
     
 #from IPython.display import clear_output;  clear_output()
 #from transformers import AutoTokenizer, FeatureExtractionPipeline, pipeline
