@@ -1,5 +1,11 @@
-NAN, 0.581, 0.5003, with SGD, narrative
-NAN, 0.652, 0.501, with AdamW , narrative
-NAN, 0.614, 0.501, with AdamW, narrative
-NAN, 0.660, 0.502, with AdamW, both 
-0.751, 0.649, 0.507, XGBoost, both 
+NAN, 0.581, 0.5003, TabNet with SGD, narrative,
+NAN, 0.652, 0.501,  TabNet with AdamW, narrative,
+NAN, 0.614, 0.501,  TabNet with AdamW, narrative,
+NAN, 0.660, 0.502,  TabNet with AdamW, both, 
+0.751, 0.649, 0.507, XGBoost, both, default 
+0.729, 0.670, 0.508, XGBoost, both, default   
+0.736, 0.679, 0.509, XGBoost, both, default scale_pos_weight=.9 
+0.736, 0.679, 0.508, XGBoost, both, default scale_pos_weight=.9 min_child_weight=.7
+0.726, 0.661, 0.509, XGBoost, both, default scale_pos_weight=.7 subsample=0.6
+
+ 
