@@ -3,6 +3,8 @@ import umap # dimensionality reduction
 import hdbscan # clustering
 from functools import partial
 
+from collections import Counter
+
 # To perform the Bayesian Optimization for searching the optimum hyperparameters, we use hyperopt package
 from hyperopt import hp
 from hyperopt import fmin, tpe, hp, STATUS_OK, space_eval, Trials 
@@ -151,6 +153,31 @@ def bayesian_search(embeddings, space, label_lower, label_upper, max_evals=100):
     return best_params, best_clusters, trials
 
 
+
+def proc( narr ):
+    sent_with_word_lemma = []
+    for intent in narr:
+        doc = nlp(intent)
+        sent_temp = ""
+        this_one = False
+        for token in doc:
+            if (token.pos_ in ['VERB', 'NOUN', 'ADJ']) or (token.dep_=='dobj'):
+                sent_temp += token.lemma_.lower() + " "
+        sent_with_word_lemma.append(sent_temp)
+    return sent_with_word_lemma
+
+
+def compute_IDF(documents):
+    word_count = Counter()
+    for doc in documents:
+        if 'drops(players' in doc:
+            print(doc)
+            print(doc.split())
+        words_set = set(doc.split())
+        word_count.update(words_set)
+    total = sum(word_count.values())
+    return {k: round((np.log2(total / v)))  for k, v in word_count.items()} # log2 is the best choice for our work (feel free)
+                                                                            # to try different functions.
 
 
 
