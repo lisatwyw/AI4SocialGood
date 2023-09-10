@@ -3,7 +3,7 @@ import umap # dimensionality reduction
 import hdbscan # clustering
 from functools import partial
 
-from collections import Counter
+import collections
 
 # To perform the Bayesian Optimization for searching the optimum hyperparameters, we use hyperopt package
 from hyperopt import hp
@@ -168,7 +168,7 @@ def proc( narr ):
 
 
 def compute_IDF(documents):
-    word_count = Counter()
+    word_count = collections.Counter()
     for doc in documents:
         if 'drops(players' in doc:
             print(doc)
