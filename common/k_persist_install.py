@@ -1,3 +1,7 @@
+'''
+!wget -O k_persist_install.py 
+'''
+
 import tensorflow as tf
 gpus = tf.config.list_physical_devices('GPU'); 
 
@@ -17,25 +21,22 @@ if gpus:
         print(e)
         
     package_dir += '_gpu'
-package_dir    
 
+print( package_dir  )
 
 cmds= ['pip install pytorch-tabnet --target=/kaggle/working/mypackages']
 cmds+=['pip install lifelines --target=/kaggle/working/mypackages']
 cmds+=['pip install sentence-transformers --target=/kaggle/working/mypackages']
-
 #cmds=['pip install scikit-survival --target=/kaggle/working/mypackages']
 cmds+=['pip install git+https://github.com/sebp/scikit-survival.git --target=/kaggle/working/mypackages']
 cmds+=['pip install hdbscan --no-deps --target=/kaggle/working/mypackages']
-
 cmds=['pip install webdriver-manager selenium']
 
+
+cmds =[]
 import subprocess, sys
 
-
-try:
-    import lifelines
-except:
+def install( cmds ): 
     print('installing pytorch-tabnet, etc...')
     if len(gpus)>0:        
         for cmd in cmds:
@@ -46,5 +47,5 @@ except:
             cmd = cmd.split(' ')
             subprocess.run(cmd, shell=False)              
 
-sys.path.append( package_dir )      
+    sys.path.append( package_dir )      
  
