@@ -1,5 +1,5 @@
 '''
-!wget -O k_persist_install.py 
+!wget -O k_persist_install.py https://raw.githubusercontent.com/lisatwyw/CS4SocialGood/main/common/k_persist_install.py
 '''
 
 import tensorflow as tf
@@ -37,7 +37,7 @@ cmds =[]
 import subprocess, sys
 
 def install( cmds ): 
-    print('installing pytorch-tabnet, etc...')
+    print( len(cmds) )
     if len(gpus)>0:        
         for cmd in cmds:
             cmd = cmd.split(' ') # essential that arguments be a list
