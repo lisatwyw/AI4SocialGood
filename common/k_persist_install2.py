@@ -1,15 +1,19 @@
 '''
 !wget -O k_persist_install.py https://raw.githubusercontent.com/lisatwyw/CS4SocialGood/main/common/k_persist_install.py
+exec( open('k_persist_install.py','r').read() )
 '''
 
+import sys 
 import tensorflow as tf
 gpus = tf.config.list_physical_devices('GPU'); 
 
-print(gpus,'gpus?')
-
 package_dir = '/kaggle/working/mypackages'
-import sys; sys.path.append( package_dir )
+
+sys.path.append( package_dir )
 if gpus:
+    package_dir += '_gpu'
+sys.path.append( package_dir )
+if gpus:    
     try:
         # Currently, memory growth needs to be the same across GPUs
         for gpu in gpus:
@@ -19,11 +23,8 @@ if gpus:
     except RuntimeError as e:
         # Memory growth must be set before GPUs have been initialized
         print(e)
-        
-    package_dir += '_gpu'
-
-print( package_dir  )
-
+      
+    
 '''
 cmds= ['pip install pytorch-tabnet --target=/kaggle/working/mypackages']
 cmds+=['pip install lifelines --target=/kaggle/working/mypackages']
@@ -34,14 +35,14 @@ cmds+=['pip install hdbscan --no-deps --target=/kaggle/working/mypackages']
 cmds=['pip install webdriver-manager selenium']
 '''
 
-cmds =[]
-import subprocess, sys
 
+import subprocess, sys
 def install( cmds ): 
     print( len(cmds) )
     
     for cmd in cmds:
         cmd +=' '+ package_dir
+        print(cmd) 
         cmd = cmd.split(' ')
         subprocess.run(cmd, shell=False)              
 
