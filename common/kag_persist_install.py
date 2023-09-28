@@ -1,6 +1,6 @@
 '''
-!wget -O k_persist_install.py https://raw.githubusercontent.com/lisatwyw/CS4SocialGood/main/common/kag_persist_install.py
-exec( open('k_persist_install.py','r').read() )
+!wget -O persist_install.py https://raw.githubusercontent.com/lisatwyw/CS4SocialGood/main/common/kag_persist_install.py
+exec( open('persist_install.py','r').read() )
 '''
 
 '''
@@ -21,9 +21,7 @@ def install_packages( cmds ):
     package_dir = '/kaggle/working/mypackages'
     
     sys.path.append( package_dir )
-    if gpus:
-        package_dir += '_gpu'
-    sys.path.append( package_dir )
+    
     if gpus:    
         try:
             # Currently, memory growth needs to be the same across GPUs
@@ -46,7 +44,24 @@ def install_packages( cmds ):
         cmd +=' --target=' + package_dir
         print(cmd) 
         cmd = cmd.split(' ')
-        subprocess.run(cmd, shell=False)              
-
+        subprocess.run(cmd, shell=False)         
     sys.path.append( package_dir )      
+    return ngpus 
+
+import torch
+def seed_everything(seed_value):
+    random.seed(seed_value)
+    np.random.seed(seed_value)
+    torch.manual_seed(seed_value)
+    os.environ['PYTHONHASHSEED'] = str(seed_value)
+    
+    if torch.cuda.is_available(): 
+        torch.cuda.manual_seed(seed_value)
+        torch.cuda.manual_seed_all(seed_value)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        
+print(  '\n\nngpus = install_packages() \n\nseed_everything(111) \n\n torch, tf, sys, os loaded')     
+
+ 
  
