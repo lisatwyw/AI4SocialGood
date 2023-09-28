@@ -24,6 +24,7 @@ if gpus:
 
 print( package_dir  )
 
+'''
 cmds= ['pip install pytorch-tabnet --target=/kaggle/working/mypackages']
 cmds+=['pip install lifelines --target=/kaggle/working/mypackages']
 cmds+=['pip install sentence-transformers --target=/kaggle/working/mypackages']
@@ -31,23 +32,18 @@ cmds+=['pip install sentence-transformers --target=/kaggle/working/mypackages']
 cmds+=['pip install git+https://github.com/sebp/scikit-survival.git --target=/kaggle/working/mypackages']
 cmds+=['pip install hdbscan --no-deps --target=/kaggle/working/mypackages']
 cmds=['pip install webdriver-manager selenium']
-
+'''
 
 cmds =[]
 import subprocess, sys
 
 def install( cmds ): 
     print( len(cmds) )
-    if len(gpus)>0:        
-        for cmd in cmds:
-            cmd+='_gpu'
-            cmd = cmd.split(' ') # essential that arguments be a list
-            print( cmd )
-            subprocess.run(cmd, shell=False)
-    else:
-        for cmd in cmds:
-            cmd = cmd.split(' ')
-            subprocess.run(cmd, shell=False)              
+    
+    for cmd in cmds:
+        cmd +=' '+ package_dir
+        cmd = cmd.split(' ')
+        subprocess.run(cmd, shell=False)              
 
     sys.path.append( package_dir )      
  
