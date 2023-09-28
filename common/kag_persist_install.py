@@ -13,8 +13,6 @@ cmds+=['pip install hdbscan --no-deps --target=/kaggle/working/mypackages']
 cmds=['pip install webdriver-manager selenium']
 '''
 
-
-
 def install_packages( cmds ): 
     import subprocess, sys, os
     import tensorflow as tf
@@ -45,7 +43,7 @@ def install_packages( cmds ):
     print( len(cmds) )
     
     for cmd in cmds:
-        cmd +=' '+ package_dir
+        cmd +=' --target=' + package_dir
         print(cmd) 
         cmd = cmd.split(' ')
         subprocess.run(cmd, shell=False)              
