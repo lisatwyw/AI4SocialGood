@@ -40,8 +40,10 @@ def install( cmds ):
     print( len(cmds) )
     if len(gpus)>0:        
         for cmd in cmds:
+            cmd+='_gpu'
             cmd = cmd.split(' ') # essential that arguments be a list
-            subprocess.run(cmd+'_gpu', shell=False)
+            print( cmd )
+            subprocess.run(cmd, shell=False)
     else:
         for cmd in cmds:
             cmd = cmd.split(' ')
