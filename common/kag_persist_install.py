@@ -1,5 +1,5 @@
 '''
-!wget -O k_persist_install.py https://raw.githubusercontent.com/lisatwyw/CS4SocialGood/main/common/k_persist_install.py
+!wget -O k_persist_install.py https://raw.githubusercontent.com/lisatwyw/CS4SocialGood/main/common/kag_persist_install.py
 exec( open('k_persist_install.py','r').read() )
 '''
 
