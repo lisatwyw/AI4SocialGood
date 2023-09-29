@@ -51,7 +51,7 @@ def install_packages( cmds ):
         cmd = cmd.split(' ')
         subprocess.run(cmd, shell=False)         
     sys.path.append( package_dir )      
-    return ngpus 
+    return gpus 
 
 import torch
 def seed_everything(seed_value):
