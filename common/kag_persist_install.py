@@ -12,10 +12,15 @@ cmds+=['pip install git+https://github.com/sebp/scikit-survival.git --target=/ka
 cmds+=['pip install hdbscan --no-deps --target=/kaggle/working/mypackages']
 cmds=['pip install webdriver-manager selenium']
 '''
+import pandas as pd
+import polars as pol
+import numpy as np
+import subprocess, sys, os
+import tensorflow as tf
+from time import time
 
+    
 def install_packages( cmds ): 
-    import subprocess, sys, os
-    import tensorflow as tf
     gpus = tf.config.list_physical_devices('GPU'); 
     
     package_dir = '/kaggle/working/mypackages'
@@ -61,7 +66,7 @@ def seed_everything(seed_value):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
         
-print(  '\n\nngpus = install_packages() \n\nseed_everything(111) \n\n torch, tf, sys, os loaded')     
-
+print(  '\n\n- torch, tf, os, sys, subprocess loaded \n- np, pol, pd, time, loaded')     
+print( '\n\nngpus = install_packages() \n\nseed_everything(111) ')
  
  
