@@ -21,7 +21,11 @@ from time import time
 
 gpus = tf.config.list_physical_devices('GPU');
 
-def install_packages( cmds, package_dir = None): #'/kaggle/working/mypackages' ):                
+def install_packages( cmds, INTERACTIVE=False ):
+    if INTERACTIVE:
+        package_dir = '/kaggle/working/mypackages' 
+    else:
+        package_dir = None 
     if package_dir is not None:
         sys.path.append( package_dir )    
     if gpus:    
@@ -63,8 +67,10 @@ def seed_everything(seed_value):
         torch.cuda.manual_seed_all(seed_value)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
-        
+
+seed_everything(1119)
+
 print(  '\n\n- torch, tf, os, sys, subprocess loaded \n- np, pol, pd, time, loaded')     
-print( '\n\nngpus = install_packages() \n\nseed_everything(111) ')
+print( '\n\nngpus = install_packages() \n\nseed_everything(1119) ')
  
  
