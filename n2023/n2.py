@@ -52,7 +52,7 @@ for src in [ 'narrative' ]:
             try:
                 from sentence_transformers import SentenceTransformer
             except:                
-                cmd=['pip install -U sentence-transformers']; install_package( cmd ); 
+                cmd=['pip install -U sentence-transformers']; install_packages( cmd ); 
                 from sentence_transformers import SentenceTransformer
                 
             if emb==1:# 768
@@ -71,7 +71,7 @@ for src in [ 'narrative' ]:
             model = hub.load(module_url)
             
         elif emb==5: # Roberta
-            cmd=['pip install -U tensorflow==2.13']; install_package( cmd ); import tensorflow as tf; import tokenization            
+            cmd=['pip install -U tensorflow==2.13']; install_packages( cmd ); import tensorflow as tf; import tokenization            
             #https://raw.githubusercontent.com/tensorflow/models/master/official/nlp/bert/tokenization.py            
             url='https://raw.githubusercontent.com/google-research/bert/master/tokenization.py';import wget; wget.download(url)
             
