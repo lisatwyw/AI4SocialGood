@@ -139,10 +139,15 @@ for src in [ 'narrative_cleaned','narrative' ]:
         elif emb==5:
             # [1] Fangxiaoyu Feng, Yinfei Yang, Daniel Cer, Narveen Ari, Wei Wang. Language-agnostic BERT Sentence Embedding. July 2020
             import tensorflow_hub as hub            
+
+            install_packages(['pip install tensorflow_text'])
+            import tensorflow_text as text  # Registers the ops.
+
             preprocessor = hub.KerasLayer('https://tfhub.dev/google/universal-sentence-encoder-cmlm/multilingual-preprocess/2')
             model = hub.KerasLayer('https://tfhub.dev/google/LaBSE/2')
             inp=preprocessor(inp)  
             TF_MODEL = 1
+            
         elif emb>=6:            
             import tensorflow_hub as hub            
             TF_MODEL = 1            
