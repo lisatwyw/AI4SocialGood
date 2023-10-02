@@ -19,12 +19,9 @@ import subprocess, sys, os
 import tensorflow as tf
 from time import time
 
-    
-def install_packages( cmds ): 
-    gpus = tf.config.list_physical_devices('GPU'); 
-    
-    package_dir = '/kaggle/working/mypackages'
-    
+gpus = tf.config.list_physical_devices('GPU');
+
+def install_packages( cmds, package_dir = '/kaggle/working/mypackages' ):                
     sys.path.append( package_dir )
     
     if gpus:    
