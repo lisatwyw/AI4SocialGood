@@ -6,7 +6,6 @@ INTERACTIVE, os.environ['KAGGLE_KERNEL_RUN_TYPE']
 import multiprocessing as mp
 from multiprocessing import Pool    
 
-
 import pandas as pd
 
 from tqdm import tqdm 
@@ -15,6 +14,14 @@ from datetime import date
 today =date.today()
 
 import pickle, json
+
+import kag_persist_install.py
+
+try:
+       import wget
+except:
+       install_packages(['pip install wget'])
+       import wget
 
 if ('decoded_df2' in globals())==False:
        decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
