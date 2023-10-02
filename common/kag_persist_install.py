@@ -22,8 +22,8 @@ from time import time
 gpus = tf.config.list_physical_devices('GPU');
 
 def install_packages( cmds, package_dir = '/kaggle/working/mypackages' ):                
-    sys.path.append( package_dir )
-    
+    if package_dir is not None:
+        sys.path.append( package_dir )    
     if gpus:    
         try:
             # Currently, memory growth needs to be the same across GPUs
@@ -33,21 +33,22 @@ def install_packages( cmds, package_dir = '/kaggle/working/mypackages' ):
             print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
         except RuntimeError as e:
             # Memory growth must be set before GPUs have been initialized
-            print(e)
-          
+            print(e)          
     try:
-        sys.mkdir( package_dir )
+        if package_dir is not None:
+            sys.mkdir( package_dir )
     except:
         pass 
-
-    print( len(cmds) )
     
     for cmd in cmds:
-        cmd +=' --target=' + package_dir
-        print(cmd) 
+        if package_dir is not None:
+            cmd +=' --target=' + package_dir
+        print( 'Running:\n\t', cmd ) 
         cmd = cmd.split(' ')
         subprocess.run(cmd, shell=False)         
-    sys.path.append( package_dir )      
+        
+    if package_dir is not None:
+        sys.path.append( package_dir )      
     return gpus 
 
 import torch
