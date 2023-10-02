@@ -165,7 +165,7 @@ for src in [ 'narrative_cleaned','narrative' ]:
             Embeddings[emb] = embed( model, inp, TF_MODEL )
             
         if emb==5:             
-            r=normalization( r['default']  )
+            r=normalization( Embeddings[emb]['default']  )
             Embeddings[emb]=np.array(r)
         
         exec_time = (time() - starttime)/60 
