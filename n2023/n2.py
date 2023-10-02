@@ -71,11 +71,10 @@ for src in [ 'narrative' ]:
             model = hub.load(module_url)
             
         elif emb==5: # Roberta
-            !pip install -U tensorflow==2.13              
+            cmd=['pip install -U tensorflow==2.13']; install_package( cmd ); import tensorflow as tf; import tokenization            
             #https://raw.githubusercontent.com/tensorflow/models/master/official/nlp/bert/tokenization.py            
-            !wget -O tokenization.py https://raw.githubusercontent.com/google-research/bert/master/tokenization.py
-            import tensorflow as tf; import tokenization            
-
+            url='https://raw.githubusercontent.com/google-research/bert/master/tokenization.py';import wget; wget.download(url)
+            
             from tensorflow.keras.models import Model
             from tensorflow.keras.optimizers import Adam
             from tensorflow.keras.layers import Dense, Input
