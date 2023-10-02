@@ -16,23 +16,23 @@ import pickle, json
 
 
 try:
-       import wget
+    import wget
 except:
-       exec( open('kag_persist_install.py','r').read() )
-       install_packages(['pip install wget'])
-       import wget
+    exec( open('kag_persist_install.py','r').read() )
+    install_packages(['pip install wget'])
+    import wget
 
 if ('decoded_df2' in globals())==False:
-       decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
-       decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)
-       Embeddings={}
-       
-       decoded_df2.to_csv('decoded_df2_unique.csv')
-       cpcs_nums = decoded_df2.cpsc_case_number
-       size_n = decoded_df2.shape[0]
+    decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
+    decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)
+    Embeddings={}
 
-def embed( sentences ):             
-    if TF_MODEL:
+    decoded_df2.to_csv('decoded_df2_unique.csv')
+    cpcs_nums = decoded_df2.cpsc_case_number
+    size_n = decoded_df2.shape[0]
+
+def embed( model, sentences, TF_MODEL ):             
+    if TF_MODEL==1:
         #embeddings = model.predict( sentences )
         embeddings = model(sentences)
     else: # pytorch         
@@ -40,8 +40,13 @@ def embed( sentences ):
     return embeddings
 
 TF_MODEL = 0
-#for src in [ 'narrative_cleaned','narrative' ]:    
-for src in [ 'narrative' ]:    
+
+def normalization(embeds):
+    norms = np.linalg.norm(embeds, 2, axis=1, keepdims=True)
+    return embeds/norms
+
+for src in [ 'narrative_cleaned','narrative' ]:    
+#for src in [ 'narrative' ]:    
     if INTERACTIVE:        
         inp = decoded_df2[src][:100] 
     else:
@@ -76,7 +81,7 @@ for src in [ 'narrative' ]:
             module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"         
             model = hub.load(module_url)
             
-        elif emb==5: # Roberta
+        elif emb==10: # Roberta
             cmd=['pip install -U tensorflow==2.13']; install_packages( cmd ); import tensorflow as tf; import tokenization            
             #https://raw.githubusercontent.com/tensorflow/models/master/official/nlp/bert/tokenization.py            
             url='https://raw.githubusercontent.com/google-research/bert/master/tokenization.py';import wget; wget.download(url)
@@ -130,30 +135,38 @@ for src in [ 'narrative' ]:
             bert_layer = hub.KerasLayer(module_url, trainable=True)
             model = build_model(bert_layer, )
             TF_MODEL = 1
-            
-        elif emb>=6:
-            import tensorflow_hub as hub
-            
+
+        elif emb==5:
+            # [1] Fangxiaoyu Feng, Yinfei Yang, Daniel Cer, Narveen Ari, Wei Wang. Language-agnostic BERT Sentence Embedding. July 2020
+            import tensorflow_hub as hub            
+            preprocessor = hub.KerasLayer('https://tfhub.dev/google/universal-sentence-encoder-cmlm/multilingual-preprocess/2')
+            model = hub.KerasLayer('https://tfhub.dev/google/LaBSE/2')
+            inp=preprocessor(inp)  
+            TF_MODEL = 1
+        elif emb>=6:            
+            import tensorflow_hub as hub            
             TF_MODEL = 1            
             if emb==6:
                 model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-small/1")
             elif emb==7:
                 model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-base/1")        
             else:
-                model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-large/1")            
-            
+                model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-large/1")                        
             print( model.summary() )
-            # model(english_sentences)
-
+            inp = preprocessor(inp)
+            
         #nprocs=mp.cpu_count() 
         #print( nprocs, ' processes' )
-        nprocs = 2
-        
+        nprocs = 2        
         if 0:
             with Pool( nprocs ) as pool:                   
                 Embeddings[emb] = list( tqdm( pool.imap( embed, inp ) ))
         else:            
-            Embeddings[emb]  = embed(inp)
+            Embeddings[emb] = embed( model, inp, TF_MODEL )
+            
+        if emb==5:             
+            r=normalization( r['default']  )
+            Embeddings[emb]=np.array(r)
         
         exec_time = (time() - starttime)/60 
                 
@@ -167,6 +180,4 @@ for src in [ 'narrative' ]:
         
         with open( pref+'".pkl', 'wb') as handle:
             pickle.dump( {"embeddings": Embeddings[emb] } , handle)   
-        print('src', emb, 'done in ', exec_time, 'written to', pref )         
-                
- 
+        print('src', emb, 'done in ', exec_time, 'written to', pref )                          
