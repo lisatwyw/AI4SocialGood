@@ -51,8 +51,8 @@ for src in [ 'narrative' ]:
         if emb<4: 
             try:
                 from sentence_transformers import SentenceTransformer
-            except:
-                !pip install -U sentence-transformers 
+            except:                
+                cmd=['pip install -U sentence-transformers']; install_package( cmd ); 
                 from sentence_transformers import SentenceTransformer
                 
             if emb==1:# 768
