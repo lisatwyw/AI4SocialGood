@@ -15,7 +15,7 @@ today =date.today()
 
 import pickle, json
 
-import kag_persist_install.py
+import kag_persist_install
 
 try:
        import wget
