@@ -20,7 +20,7 @@ import kag_persist_install
 try:
        import wget
 except:
-       install_packages(['pip install wget'])
+       kag_persist_install.install_packages(['pip install wget'])
        import wget
 
 if ('decoded_df2' in globals())==False:
