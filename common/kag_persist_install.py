@@ -21,7 +21,7 @@ from time import time
 
 gpus = tf.config.list_physical_devices('GPU');
 
-def install_packages( cmds, package_dir = '/kaggle/working/mypackages' ):                
+def install_packages( cmds, package_dir = None): #'/kaggle/working/mypackages' ):                
     if package_dir is not None:
         sys.path.append( package_dir )    
     if gpus:    
