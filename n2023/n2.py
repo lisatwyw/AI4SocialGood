@@ -1,7 +1,6 @@
 import os
 INTERACTIVE = os.environ['KAGGLE_KERNEL_RUN_TYPE'] == 'Interactive'
-INTERACTIVE, os.environ['KAGGLE_KERNEL_RUN_TYPE'] 
-
+print( 'interactive?', INTERACTIVE, os.environ['KAGGLE_KERNEL_RUN_TYPE'] )
 
 import multiprocessing as mp
 from multiprocessing import Pool    
