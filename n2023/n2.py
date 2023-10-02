@@ -14,12 +14,11 @@ today =date.today()
 
 import pickle, json
 
-
 try:
     import wget
 except:
     exec( open('kag_persist_install.py','r').read() )
-    install_packages(['pip install wget'])
+    install_packages(['pip install wget'], None )
     import wget
 
 if ('decoded_df2' in globals())==False:
@@ -81,7 +80,51 @@ for src in [ 'narrative_cleaned','narrative' ]:
             module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"         
             model = hub.load(module_url)
             
-        elif emb==10: # Roberta
+        
+
+        elif emb==5:
+            # [1] Fangxiaoyu Feng, Yinfei Yang, Daniel Cer, Narveen Ari, Wei Wang. Language-agnostic BERT Sentence Embedding. July 2020
+            import tensorflow_hub as hub            
+
+            install_packages(['pip install tensorflow_text'])
+            import tensorflow_text as text  # Registers the ops.
+
+            preprocessor = hub.KerasLayer('https://tfhub.dev/google/universal-sentence-encoder-cmlm/multilingual-preprocess/2')
+            model = hub.KerasLayer('https://tfhub.dev/google/LaBSE/2')
+            inp=preprocessor(inp)  
+            TF_MODEL = 1
+
+        elif emb >=6:
+            import torch
+            from transformers import BertModel, BertTokenizerFast            
+            tokenizer = BertTokenizerFast.from_pretrained("setu4993/LEALLA-small")
+            if emb==6:
+                model = BertModel.from_pretrained("setu4993/LEALLA-small")
+            elif emb==7:
+                model = BertModel.from_pretrained("setu4993/LEALLA-base")
+            elif emb==8:
+                model = BertModel.from_pretrained("setu4993/LEALLA-large")
+                
+            model = model.eval()
+            english_inputs = tokenizer(inp, return_tensors="pt", padding=True)
+
+            with torch.no_grad():
+                english_outputs = model(**english_inputs)
+            Embeddings[emb]= np.array( english_outputs .pooler_output )
+
+        elif emb>=1006:            
+            import tensorflow_hub as hub            
+            TF_MODEL = 1            
+            if emb==6:
+                model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-small/1")
+            elif emb==7:
+                model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-base/1")        
+            else:
+                model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-large/1")                        
+            print( model.summary() )
+            inp = preprocessor(inp)
+
+        elif emb==9: # Roberta
             cmd=['pip install -U tensorflow==2.13']; install_packages( cmd ); import tensorflow as tf; import tokenization            
             #https://raw.githubusercontent.com/tensorflow/models/master/official/nlp/bert/tokenization.py            
             url='https://raw.githubusercontent.com/google-research/bert/master/tokenization.py';import wget; wget.download(url)
@@ -136,39 +179,14 @@ for src in [ 'narrative_cleaned','narrative' ]:
             model = build_model(bert_layer, )
             TF_MODEL = 1
 
-        elif emb==5:
-            # [1] Fangxiaoyu Feng, Yinfei Yang, Daniel Cer, Narveen Ari, Wei Wang. Language-agnostic BERT Sentence Embedding. July 2020
-            import tensorflow_hub as hub            
-
-            install_packages(['pip install tensorflow_text'])
-            import tensorflow_text as text  # Registers the ops.
-
-            preprocessor = hub.KerasLayer('https://tfhub.dev/google/universal-sentence-encoder-cmlm/multilingual-preprocess/2')
-            model = hub.KerasLayer('https://tfhub.dev/google/LaBSE/2')
-            inp=preprocessor(inp)  
-            TF_MODEL = 1
-            
-        elif emb>=6:            
-            import tensorflow_hub as hub            
-            TF_MODEL = 1            
-            if emb==6:
-                model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-small/1")
-            elif emb==7:
-                model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-base/1")        
-            else:
-                model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-large/1")                        
-            print( model.summary() )
-            inp = preprocessor(inp)
-            
         #nprocs=mp.cpu_count() 
         #print( nprocs, ' processes' )
         nprocs = 2        
         if 0:
             with Pool( nprocs ) as pool:                   
                 Embeddings[emb] = list( tqdm( pool.imap( embed, inp ) ))
-        else:            
-            Embeddings[emb] = embed( model, inp, TF_MODEL )
-            
+        elif emb<6:            
+            Embeddings[emb] = embed( model, inp, TF_MODEL )            
         if emb==5:             
             r=normalization( Embeddings[emb]['default']  )
             Embeddings[emb]=np.array(r)
