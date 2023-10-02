@@ -2,40 +2,35 @@ import os
 INTERACTIVE = os.environ['KAGGLE_KERNEL_RUN_TYPE'] == 'Interactive'
 INTERACTIVE, os.environ['KAGGLE_KERNEL_RUN_TYPE'] 
 
-#!pip install -U tensorflow==2.13
-       
-import  multiprocessing as mp
-from multiprocessing import Pool    
-from tqdm import tqdm 
-import tensorflow_hub as hub
-from sentence_transformers import SentenceTransformer
-import pandas as pd
-import tensorflow as tf 
 
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.layers import Dense, Input
+import multiprocessing as mp
+from multiprocessing import Pool    
+
+
+import pandas as pd
+
+from tqdm import tqdm 
 from time import time
-import pickle
 from datetime import date
 today =date.today()
 
-if ('decoded_df2' in globals())==False:
-    decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
-    decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)
-    Embeddings={}
+import pickle, json
 
-decoded_df2.to_csv('decoded_df2_unique.csv')
-cpcs_nums = decoded_df2.cpsc_case_number
-size_n = decoded_df2.shape[0]
+if ('decoded_df2' in globals())==False:
+       decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
+       decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)
+       Embeddings={}
+       
+       decoded_df2.to_csv('decoded_df2_unique.csv')
+       cpcs_nums = decoded_df2.cpsc_case_number
+       size_n = decoded_df2.shape[0]
 
 def embed( sentences ):             
     if TF_MODEL:
         #embeddings = model.predict( sentences )
         embeddings = model(sentences)
     else: # pytorch         
-        embeddings = model.encode(sentences)
-            
+        embeddings = model.encode(sentences)            
     return embeddings
 
 TF_MODEL = 0
@@ -51,9 +46,7 @@ for src in [ 'narrative' ]:
         
     inp = list(inp)
         
-    for emb in [1,2,3]:
-        #pd.DataFrame( dict( cpcs_nums=cpcs_nums) ).to_csv( f'{narrative_source}_emb{emb}_n{size_n}'.csv ) 
-
+    for emb in EMB:
         starttime=time()
         if emb<4: 
             try:
@@ -71,15 +64,22 @@ for src in [ 'narrative' ]:
         
         elif emb==4: # 512
             TF_MODEL = 1
+            import tensorflow_hub as hub
             # Daniel Cer, Yinfei Yang, Sheng-yi Kong, Nan Hua, Nicole Limtiaco, Rhomni St. John, Noah Constant, Mario Guajardo-Céspedes, Steve Yuan, Chris Tar, Yun-Hsuan Sung, Brian Strope, Ray Kurzweil. 
             # Universal Sentence Encoder. arXiv:1803.11175, 2018.
             module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"         
             model = hub.load(module_url)
             
         elif emb==5: # Roberta
+            !pip install -U tensorflow==2.13              
             #https://raw.githubusercontent.com/tensorflow/models/master/official/nlp/bert/tokenization.py            
             !wget -O tokenization.py https://raw.githubusercontent.com/google-research/bert/master/tokenization.py
-            import tokenization            
+            import tensorflow as tf; import tokenization            
+
+            from tensorflow.keras.models import Model
+            from tensorflow.keras.optimizers import Adam
+            from tensorflow.keras.layers import Dense, Input
+
             def bert_encode(texts, tokenizer, max_len=512):
                 all_tokens = []
                 all_masks = []
@@ -128,6 +128,7 @@ for src in [ 'narrative' ]:
             
         elif emb>=6:
             import tensorflow_hub as hub
+            
             TF_MODEL = 1            
             if emb==6:
                 model = hub.KerasLayer("https://tfhub.dev/google/LEALLA/LEALLA-small/1")
@@ -162,6 +163,5 @@ for src in [ 'narrative' ]:
         with open( pref+'".pkl', 'wb') as handle:
             pickle.dump( {"embeddings": Embeddings[emb] } , handle)   
         print('src', emb, 'done in ', exec_time, 'written to', pref )         
-        
-        
+                
  
