@@ -6,6 +6,7 @@ import xgboost as xgb
 time2event, surv_str, event_indicator= {},{},{}
 
 def get_surv( df ):
+    from sksurv.util import Surv
     ev = ( df['severity'] >= 3 ) .values
     #ev = ( df['outcome']  ) .values
     time = ( df['time2hosp']  ) .values
