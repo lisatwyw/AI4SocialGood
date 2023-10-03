@@ -16,6 +16,19 @@ t='trn'; event_indicator[t], time2event[t], surv_str[t] = get_surv( surv_pols[t]
 t='val'; event_indicator[t], time2event[t], surv_str[t] = get_surv( surv_pols[t].to_pandas() )
 t='tst'; event_indicator[t], time2event[t], surv_str[t] = get_surv( surv_pols[t].to_pandas() )
 
+
+def get_cate_outcome( S ):
+    scaler = StandardScaler()
+    scaler.fit( S['trn'].to_pandas()[att] )
+    S2={}
+    for t in ['trn','val','tst']:                
+        S2[t] = pd.DataFrame( scaler.transform( S[t][att] ), columns=att  )        
+        S2[t]['year']= (S[t]['year']-2013)/9
+        S2[t]['month']=S[t]['month']/12 
+        S2[t]['time2hosp']=S[t]['time2hosp'] 
+        S2[t]['outcome']=S[t]['severity'] > O
+    return S2, scaler 
+
 # ====================================
 #
 # XGB/ Optuna search
@@ -86,9 +99,8 @@ def run_xgb_optuna( emb, X, surv_inter ):
     #plt.figure()
     fig = optuna.visualization.plot_param_importances(study)
     fig.show()
-    #plt.title( f'Word embedding {emb}')
-    for t in ['trn','val','tst']:
-         
+    
+    for t in ['trn','val','tst']:         
         res[t]= pd.DataFrame({'Label (lower bound)': surv_inter[t]['label_lower_bound'],
                    'Label (upper bound)': surv_inter[t]['label_upper_bound'],
                    'Predicted label': bst.predict(ds[t]) } )
@@ -216,7 +228,7 @@ from sksurv.metrics import *
 labels = ['3h','6h','9h','12h','15h','18h', '24h','2d','3d','1w','2w','1mo']
 
 for mid in ['xgb',]:
-    for emb in [4]:        
+    for emb in EMB:        
     #for emb in [19,20,1,2,3,4,]:        
         X,res ={},{}    
         for t in [ 'trn','val','tst']:
