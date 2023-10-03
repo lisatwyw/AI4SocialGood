@@ -2,7 +2,10 @@ install_packages(['pip install optuna'], INTERACTIVE )
 import optuna
 import xgboost as xgb
 
-
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import log_loss
+from pytorch_tabnet.metrics import Metric
+from sklearn.metrics import roc_auc_score, log_loss
 
 # ====================================
 # XGB/ Optuna search
@@ -111,84 +114,80 @@ if 0:
 # TabNet
 # ====================================
 
-from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor 
-from pytorch_tabnet.augmentations import ClassificationSMOTE
-from sklearn.metrics import confusion_matrix
+if 0:
+    from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor 
+    from pytorch_tabnet.augmentations import ClassificationSMOTE
 
-from sklearn.metrics import log_loss
-from pytorch_tabnet.metrics import Metric
-from sklearn.metrics import roc_auc_score, log_loss
-
-class LogitsLogLoss(Metric):
-    """
-    LogLoss with sigmoid applied
-    """
-
-    def __init__(self):
-        self._name = "logits_ll"
-        self._maximize = False
-
-    def __call__(self, y_true, y_pred):
+    class LogitsLogLoss(Metric):
         """
-        Compute LogLoss of predictions.
-
-        Parameters
-        ----------
-        y_true: np.ndarray
-            Target matrix or vector
-        y_score: np.ndarray
-            Score matrix or vector
-
-        Returns
-        -------
-            float
-            LogLoss of predictions vs targets.
+        LogLoss with sigmoid applied
         """
-        logits = 1 / (1 + np.exp(-y_pred))
-        aux = (1-y_true)*np.log(1-logits+1e-15) + y_true*np.log(logits+1e-15)
-        return np.mean(-aux)
-
     
-def run_tabnet(emb, X, event_indicator ):
-    for mid in range(3):
-        D = 24
-        if mid==0:
-            aug=None
-        elif mid==1:            
-            aug = ClassificationSMOTE(p=0.2)    
-        elif mid==2:       
-            aug=None
-            D = 48
-        tabnet_params = dict(n_d=D, n_a=D, n_steps=1, gamma=1.3,
-                             lambda_sparse=0.0, optimizer_fn=torch.optim.Adam,
-                             optimizer_params=dict(lr=2e-3, weight_decay=1e-5),
-                             mask_type='entmax',
-                             scheduler_params=dict(mode="min",
-                                                   patience=5,
-                                                   min_lr=1e-5,
-                                                   factor=0.9,),
-                             scheduler_fn=torch.optim.lr_scheduler.ReduceLROnPlateau,
-                             verbose=10, 
-                             )
-        MAX_EP = 500
-        clf = TabNetClassifier(**tabnet_params ) 
-        clf.fit(
-            X['trn'], event_indicator['trn'].astype(int),
-            eval_set=[( X['val'], event_indicator['val'].astype(int)) ],
-            max_epochs=MAX_EP, compute_importance=False, augmentations = aug, 
-            num_workers = 4, batch_size=1024, virtual_batch_size=128, weights=.08,
-        )   
-        res= {}
-        for t in ['trn','val','tst']:
-            y_preds = clf.predict( X[t]) 
-            tn,fp,fn,tp = confusion_matrix( y_preds,  event_indicator[t] ).ravel()
-            sp=tn/(tn+fp)
-            se=tp/(tp+fn)
-            npv=tn/(tn+fn)
-            ppv=tp/(tp+fp)    
-            print(mid, t.upper(), f'SEN={se*100:.2f}, SPE={sp*100:.2f}, PPV={ppv*100:.2f}, NPV={npv*100:.2f}')
-            res[t] = f'SEN={se*100:.2f}, SPE={sp*100:.2f}, PPV={ppv*100:.2f}, NPV={npv*100:.2f}'
-        return res
+        def __init__(self):
+            self._name = "logits_ll"
+            self._maximize = False
+    
+        def __call__(self, y_true, y_pred):
+            """
+            Compute LogLoss of predictions.
+    
+            Parameters
+            ----------
+            y_true: np.ndarray
+                Target matrix or vector
+            y_score: np.ndarray
+                Score matrix or vector
+    
+            Returns
+            -------
+                float
+                LogLoss of predictions vs targets.
+            """
+            logits = 1 / (1 + np.exp(-y_pred))
+            aux = (1-y_true)*np.log(1-logits+1e-15) + y_true*np.log(logits+1e-15)
+            return np.mean(-aux)
+    
+        
+    def run_tabnet(emb, X, event_indicator ):
+        for mid in range(3):
+            D = 24
+            if mid==0:
+                aug=None
+            elif mid==1:            
+                aug = ClassificationSMOTE(p=0.2)    
+            elif mid==2:       
+                aug=None
+                D = 48
+            tabnet_params = dict(n_d=D, n_a=D, n_steps=1, gamma=1.3,
+                                 lambda_sparse=0.0, optimizer_fn=torch.optim.Adam,
+                                 optimizer_params=dict(lr=2e-3, weight_decay=1e-5),
+                                 mask_type='entmax',
+                                 scheduler_params=dict(mode="min",
+                                                       patience=5,
+                                                       min_lr=1e-5,
+                                                       factor=0.9,),
+                                 scheduler_fn=torch.optim.lr_scheduler.ReduceLROnPlateau,
+                                 verbose=10, 
+                                 )
+            MAX_EP = 500
+            clf = TabNetClassifier(**tabnet_params ) 
+            clf.fit(
+                X['trn'], event_indicator['trn'].astype(int),
+                eval_set=[( X['val'], event_indicator['val'].astype(int)) ],
+                max_epochs=MAX_EP, compute_importance=False, augmentations = aug, 
+                num_workers = 4, batch_size=1024, virtual_batch_size=128, weights=.08,
+            )   
+            res= {}
+            for t in ['trn','val','tst']:
+                y_preds = clf.predict( X[t]) 
+                tn,fp,fn,tp = confusion_matrix( y_preds,  event_indicator[t] ).ravel()
+                sp=tn/(tn+fp)
+                se=tp/(tp+fn)
+                npv=tn/(tn+fn)
+                ppv=tp/(tp+fp)    
+                print(mid, t.upper(), f'SEN={se*100:.2f}, SPE={sp*100:.2f}, PPV={ppv*100:.2f}, NPV={npv*100:.2f}')
+                res[t] = f'SEN={se*100:.2f}, SPE={sp*100:.2f}, PPV={ppv*100:.2f}, NPV={npv*100:.2f}'
+            return res
 
     
 
