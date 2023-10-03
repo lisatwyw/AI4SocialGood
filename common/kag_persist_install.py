@@ -55,11 +55,12 @@ def install_packages( cmds, INTERACTIVE=False ):
         sys.path.append( package_dir )      
     return gpus 
 
-import torch
+import torch, random, 
 def seed_everything(seed_value):
     random.seed(seed_value)
     np.random.seed(seed_value)
     torch.manual_seed(seed_value)
+    tf.set_random_seed(seed_value)
     os.environ['PYTHONHASHSEED'] = str(seed_value)
     
     if torch.cuda.is_available(): 
@@ -68,8 +69,9 @@ def seed_everything(seed_value):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
+    print('random, torch, tf, os packages seeded') 
+          
 seed_everything(1119)
-
 print(  '\n\n- torch, tf, os, sys, subprocess loaded \n- np, pol, pd, time, loaded')     
 print( '\n\nngpus = install_packages() \n\nseed_everything(1119) ')
  
