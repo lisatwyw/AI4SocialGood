@@ -1,4 +1,8 @@
-install_packages(['pip install sksurv'], INTERACTIVE )
+try:
+    import sksurv    
+except:
+    install_packages(['pip install scikit-survival'], INTERACTIVE )
+    import sksurv
 
 from time import time
 import tensorflow_hub as hub
