@@ -4,7 +4,6 @@ import xgboost as xgb
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import log_loss
-from pytorch_tabnet.metrics import Metric
 from sklearn.metrics import roc_auc_score, log_loss
 
 # ====================================
@@ -115,6 +114,7 @@ if 0:
 # ====================================
 
 if 0:
+    from pytorch_tabnet.metrics import Metric
     from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor 
     from pytorch_tabnet.augmentations import ClassificationSMOTE
 
