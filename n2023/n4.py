@@ -193,6 +193,10 @@ if 0:
 
     
 
+pos_ratio = 1-np.isinf( surv_inter['trn']['label_upper_bound'] ).sum() / surv_inter['trn'].shape[0]
+print( 'pos-neg-ratio:', pos_ratio,  )
+
+
 for mid in ['xgb',]:
     for emb in EMB:        
     #for emb in [19,20,1,2,3,4,]:        
