@@ -3,6 +3,8 @@
 exec( open('persist_install.py','r').read() )
 '''
 
+
+
 '''
 cmds= ['pip install pytorch-tabnet --target=/kaggle/working/mypackages']
 cmds+=['pip install lifelines --target=/kaggle/working/mypackages']
@@ -13,6 +15,7 @@ cmds+=['pip install hdbscan --no-deps --target=/kaggle/working/mypackages']
 cmds=['pip install webdriver-manager selenium']
 '''
 
+
 import torch, random
 import pandas as pd
 import polars as pol
@@ -20,6 +23,10 @@ import numpy as np
 import subprocess, sys, os
 import tensorflow as tf
 from time import time
+
+INTERACTIVE = os.environ['KAGGLE_KERNEL_RUN_TYPE'] == 'Interactive'
+if 'ipykernel' in os.environ['MPLBACKEND']:
+  INTERACTIVE = 2
 
 gpus = tf.config.list_physical_devices('GPU');
 
