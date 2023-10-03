@@ -19,10 +19,14 @@ except:
 
 if ('decoded_df2' in globals())==False:
     print('reading decoded_df2...')
+
     
-    decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
-    decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)    
-    decoded_df2.to_csv('decoded_df2_unique.csv')
+    try:
+        decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
+        decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)    
+        decoded_df2.to_csv('decoded_df2_unique.csv')
+    except:
+        decoded_df2=pd.read_csv('/kaggle/input/n-raw-extract-4/decoded_df2_unique.csv')           
     
     cpcs_nums = decoded_df2.cpsc_case_number
     size_n = decoded_df2.shape[0]
