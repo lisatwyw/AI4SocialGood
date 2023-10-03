@@ -1,19 +1,3 @@
-import os
-INTERACTIVE = os.environ['KAGGLE_KERNEL_RUN_TYPE'] == 'Interactive'
-print( 'interactive?', INTERACTIVE, os.environ['KAGGLE_KERNEL_RUN_TYPE'] )
-
-import multiprocessing as mp
-from multiprocessing import Pool    
-
-import pandas as pd
-
-from tqdm import tqdm 
-from time import time
-from datetime import date
-today =date.today()
-
-import pickle, json
-
 try:
     import wget
 except:
