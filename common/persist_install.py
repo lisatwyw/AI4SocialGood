@@ -1,5 +1,5 @@
 '''
-!wget -O persist_install.py https://raw.githubusercontent.com/lisatwyw/CS4SocialGood/main/common/kag_persist_install.py
+!wget -O persist_install.py https://raw.githubusercontent.com/lisatwyw/CS4SocialGood/main/common/persist_install.py
 exec( open('persist_install.py','r').read() )
 '''
 
@@ -55,7 +55,7 @@ def install_packages( cmds, INTERACTIVE=False ):
         sys.path.append( package_dir )      
     return gpus 
 
-import torch, random, 
+import torch, random
 def seed_everything(seed_value):
     random.seed(seed_value)
     np.random.seed(seed_value)
