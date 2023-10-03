@@ -1,3 +1,4 @@
+install_packages(['pip install sksurv'], INTERACTIVE )
 
 from time import time
 import tensorflow_hub as hub
