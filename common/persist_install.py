@@ -61,7 +61,7 @@ def seed_everything(seed_value):
     random.seed(seed_value)
     np.random.seed(seed_value)
     torch.manual_seed(seed_value)
-    tf.set_random_seed(seed_value)
+    tf.random.set_seed(seed_value)
     os.environ['PYTHONHASHSEED'] = str(seed_value)
     
     if torch.cuda.is_available(): 
