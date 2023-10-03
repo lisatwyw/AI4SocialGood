@@ -30,6 +30,9 @@ if 'ipykernel' in os.environ['MPLBACKEND']:
 
 gpus = tf.config.list_physical_devices('GPU');
 
+import multiprocessing as mp
+ncpus = mp.cpu_count()
+
 def install_packages( cmds, INTERACTIVE=False ):
     if INTERACTIVE:
         package_dir = '/kaggle/working/mypackages' 
