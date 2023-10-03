@@ -297,6 +297,20 @@ def get_surv( df ):
     time = ( df['time2hosp']  ) .values
     return ev, time, Surv.from_arrays(ev, time)
 
+def get_cate_outcome( S ):
+    scaler = StandardScaler()
+    scaler.fit( S['trn'].to_pandas()[att] )
+    S2={}
+    for t in ['trn','val','tst']:                
+        S2[t] = pd.DataFrame( scaler.transform( S[t][att] ), columns=att  )        
+        S2[t]['year']= (S[t]['year']-2013)/9
+        S2[t]['month']=S[t]['month']/12 
+        S2[t]['time2hosp']=S[t]['time2hosp'] 
+        S2[t]['outcome']=S[t]['severity'] > O
+    return S2, scaler 
+
+
+
 if ( 'surv_pols' in globals()) ==False:
     surv_pols, _, surv_inter = split_ds( pol.DataFrame( decoded_df2 ) )
     time2event, surv_str, event_indicator= {},{},{}
