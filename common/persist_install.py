@@ -12,6 +12,8 @@ cmds+=['pip install git+https://github.com/sebp/scikit-survival.git --target=/ka
 cmds+=['pip install hdbscan --no-deps --target=/kaggle/working/mypackages']
 cmds=['pip install webdriver-manager selenium']
 '''
+
+import torch, random
 import pandas as pd
 import polars as pol
 import numpy as np
@@ -55,7 +57,6 @@ def install_packages( cmds, INTERACTIVE=False ):
         sys.path.append( package_dir )      
     return gpus 
 
-import torch, random
 def seed_everything(seed_value):
     random.seed(seed_value)
     np.random.seed(seed_value)
