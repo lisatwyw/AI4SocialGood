@@ -19,14 +19,10 @@ except:
 
 if ('decoded_df2' in globals())==False:
     print('reading decoded_df2...')
-
     
-    try:
-        decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
-        decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)    
-        decoded_df2.to_csv('decoded_df2_unique.csv')
-    except:
-        decoded_df2=pd.read_csv('/kaggle/input/n-raw-extract-4/decoded_df2_unique.csv')           
+    decoded_df2=pd.read_csv('/kaggle/input/neiss-sentence-transform-embeddings/decoded_df2__l1.csv')
+    decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)    
+    decoded_df2.to_csv('decoded_df2_unique.csv')
     
     cpcs_nums = decoded_df2.cpsc_case_number
     size_n = decoded_df2.shape[0]
@@ -41,26 +37,29 @@ def embed( model, sentences, TF_MODEL ):
         embeddings = model.encode(sentences)            
     return embeddings
 
-
-
 def normalization(embeds):
     norms = np.linalg.norm(embeds, 2, axis=1, keepdims=True)
     return embeds/norms
 
+# ======== https://github.com/huggingface/transformers/issues/15038 
+class NoDaemonProcess( mp.Process):
+    @property
+    def daemon(self):
+        return False
+    @daemon.setter
+    def daemon(self, value):
+        pass
 
-for src in [ 'narrative_cleaned']:#,'narrative' ]:    
-    for emb in [EMB]:            
-        try:
-            del ll
-        except:
-            pass
-        
-        for bat_i in tqdm(list(range(nbatches)) ):
-            
-            if 0 & INTERACTIVE:        
-                inp = decoded_df2[src][:100] 
+class NoDaemonContext(type( mp.get_context("fork"))):
+    Process = NoDaemonProcess
+
+for src in [ 'narrative_cleaned']: #,'narrative' ]:    
+    for emb in EMB:            
+        if 1:            
+            if INTERACTIVE:        
+                inp = decoded_df2[src][:30] 
             else:
-                inp =  decoded_df2[src][bat_i::nbatches]
+                inp =  decoded_df2[src]  
             if 'cleaned' not in src:        
                 inp = inp.str.lower()
             inp = list(inp)
@@ -93,117 +92,78 @@ for src in [ 'narrative_cleaned']:#,'narrative' ]:
             elif emb==5:
                 # [1] Fangxiaoyu Feng, Yinfei Yang, Daniel Cer, Narveen Ari, Wei Wang. Language-agnostic BERT Sentence Embedding. July 2020
                 import tensorflow_hub as hub            
-
-                if ( 'll' in globals() )==False:
-                    ll = np.zeros( (size_n, 768) )
                 try:
                     import tensorflow_text as text  # Registers the ops.
                 except:
                     install_packages(['pip install tensorflow_text'], INTERACTIVE)
                     import tensorflow_text as text  # Registers the ops.
 
-                preprocessor = hub.KerasLayer('https://tfhub.dev/google/universal-sentence-encoder-cmlm/multilingual-preprocess/2')
+                from transformers import pipeline 
+                tokenizer = hub.KerasLayer('https://tfhub.dev/google/universal-sentence-encoder-cmlm/multilingual-preprocess/2')
                 model = hub.KerasLayer('https://tfhub.dev/google/LaBSE/2')
-
-                inp=preprocessor(inp)  
                 
-                print( 'input preprocessed')
-                TF_MODEL = 1
+                def compute( inp ):                                       
+                    #print( end=f'{inp} ?', flush=True )
+                    res= model( tokenizer( inp ) )                    
+                    r=normalization( res['default']  )
+                    return np.array(r)                                               
+                mp_context = NoDaemonContext()                
+                nprocs = mp.cpu_count()
+                print( nprocs, 'cores' )
+                with mp_context.Pool( nprocs ) as pool:
+                    async_r = [pool.apply_async( compute, ii ).get() for i in tqdm(range(size_n)) for ii in inp[i] ] 
+                    print( end='.' )
                 
-                a = embed( model, inp, TF_MODEL )            
-                r=normalization( a['default']  )
-                ll[bat_i::nbatches] = np.array(r)
-            
-                print( 'calc embedding')            
+                '''
+                def compute( inp ):
+                    pip = get_pip() 
+                pool = Pool( proprocess = 3 )
+                preds = pool.map( compute, inp )
+                pool.close()
+                pool.join()                
+                Embeddings[emb]= preds
+                '''                
+            elif emb>=6:
 
-            elif emb>=6:                
-                if ( 'll' in globals() )==False:
-                    ll = np.zeros( (size_n, 768))
-                    
-                import torch            
-                from transformers import BertModel, BertTokenizerFast            
-                tokenizer = BertTokenizerFast.from_pretrained("setu4993/LEALLA-small")
-                if emb==6:
-                    model = BertModel.from_pretrained("setu4993/LEALLA-small")
-                elif emb==7:
-                    model = BertModel.from_pretrained("setu4993/LEALLA-base")
-                elif emb==8:
-                    model = BertModel.from_pretrained("setu4993/LEALLA-large")
+                import torch                                            
+                from transformers import pipeline
+                from torch.multiprocessing import Pool, Process, set_start_method
+                #set_start_method("spawn", force=True)
 
-                model = model.eval()
-                english_inputs = tokenizer(inp, return_tensors="pt", padding=True)
+                from transformers import BertModel, BertTokenizerFast         
+                names ={}
+                names[6] = "setu4993/LEALLA-small"
+                names[7] = "setu4993/LEALLA-base"
+                names[8] = "setu4993/LEALLA-large"                    
 
-                with torch.no_grad():
-                    english_outputs = model(**english_inputs)
-                r = np.array( english_outputs.pooler_output )                                               
-                ll[bat_i::nbatches] = r                
+                def get_pipe():
+                    tokenizer = BertTokenizerFast.from_pretrained(names[emb])
+                    model =  BertModel.from_pretrained(names[emb])
+                    model = model.eval()  
+                    return tokenizer, model
                 
-            elif 0: # Roberta
-                cmd=['pip install -U tensorflow==2.13']; install_packages( cmd, INTERACTIVE ); import tensorflow as tf; import tokenization            
-                #https://raw.githubusercontent.com/tensorflow/models/master/official/nlp/bert/tokenization.py            
-                url='https://raw.githubusercontent.com/google-research/bert/master/tokenization.py';import wget; wget.download(url)
+                def compute( inp ):
+                    tokenizer, model = get_pipe()                    
+                    #print(len(inp), end=f' {inp}', )
+                    english_inputs = tokenizer(inp, return_tensors="pt", padding=True)
 
-                from tensorflow.keras.models import Model
-                from tensorflow.keras.optimizers import Adam
-                from tensorflow.keras.layers import Dense, Input
-
-                def bert_encode(texts, tokenizer, max_len=512):
-                    all_tokens = []
-                    all_masks = []
-                    all_segments = []
-
-                    for text in texts:
-                        text = tokenizer.tokenize(text)
-
-                        text = text[:max_len-2]
-                        input_sequence = ["[CLS]"] + text + ["[SEP]"]
-                        pad_len = max_len - len(input_sequence)
-
-                        tokens = tokenizer.convert_tokens_to_ids(input_sequence)
-                        tokens += [0] * pad_len
-                        pad_masks = [1] * len(input_sequence) + [0] * pad_len
-                        segment_ids = [0] * max_len
-
-                        all_tokens.append(tokens)
-                        all_masks.append(pad_masks)
-                        all_segments.append(segment_ids)
-
-                    return np.array(all_tokens), np.array(all_masks), np.array(all_segments)
-
-                def build_model(bert_layer, max_len=512):
-
-                    input_word_ids = Input(shape=(max_len,), dtype=tf.int32, name="input_word_ids")
-                    input_mask = Input(shape=(max_len,), dtype=tf.int32, name="input_mask")
-                    segment_ids = Input(shape=(max_len,), dtype=tf.int32, name="segment_ids")
-
-                    #could be pooled_output, sequence_output yet sequence output provides for each input token (in context)
-                    _, sequence_output = bert_layer([input_word_ids, input_mask, segment_ids])
-                    clf_output = sequence_output[:, 0, :]
-                    out = Dense(1, activation='sigmoid')(clf_output)
-
-                    model = Model(inputs=[input_word_ids, input_mask, segment_ids], outputs=out)
-
-                    #specifying optimizer
-                    model.compile(Adam(learning_rate=1e-5), loss='binary_crossentropy', metrics=['accuracy'])
-
-                    return model
-
-                module_url = "https://tfhub.dev/tensorflow/bert_en_uncased_L-24_H-1024_A-16/1"
-                bert_layer = hub.KerasLayer(module_url, trainable=True)
-                model = build_model(bert_layer, )
-                TF_MODEL = 1
-
-        try:
-            Embeddings[emb]= ll 
-        except:
-            pass        
-        nprocs = 2        
-        if 0:
-            with Pool( nprocs ) as pool:                   
-                Embeddings[emb] = list( tqdm( pool.imap( embed, inp ) ))
-        elif emb<5:            
+                    with torch.no_grad():
+                        english_outputs = model(**english_inputs)
+                    r = np.array( english_outputs.pooler_output )    
+                    return r
+                
+                multi_pool = Pool(processes=3)
+                predictions = multi_pool.map( compute, inp)                 
+                multi_pool.close()
+                multi_pool.join()
+                
+                #m = predictions[0].shape[1] 
+                #p = np.zeros( (size_n, m) )
+                #predictions = [ p[i,:]=j for i,j in enumerate( predictions ) ]                
+                Embeddings[emb]=np.array(predictions).squeeze()
+                
+        if emb<5:            
             Embeddings[emb] = embed( model, inp, TF_MODEL )            
-
 
         exec_time = (time() - starttime)/60 
 
@@ -215,6 +175,6 @@ for src in [ 'narrative_cleaned']:#,'narrative' ]:
         f.write( 'Finished in %2.f minutes'%exec_time )
         f.close()
 
-        with open( pref+'".pkl', 'wb') as handle:
+        with open( pref+'.pkl', 'wb') as handle:
             pickle.dump( {"embeddings": Embeddings[emb] } , handle)   
         print('src', emb, 'done in ', exec_time, 'written to', pref )                          
