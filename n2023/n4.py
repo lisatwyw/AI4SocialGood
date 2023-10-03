@@ -6,6 +6,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import log_loss
 from sklearn.metrics import roc_auc_score, log_loss
 
+from datetime import date
+
 # ====================================
 # XGB/ Optuna search
 # ====================================
@@ -195,7 +197,6 @@ if 0:
 
 pos_ratio = 1-np.isinf( surv_inter['trn']['label_upper_bound'] ).sum() / surv_inter['trn'].shape[0]
 print( 'pos-neg-ratio:', pos_ratio,  )
-
 
 for mid in ['xgb',]:
     for emb in EMB:        
