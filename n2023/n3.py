@@ -289,6 +289,13 @@ def split_ds( df2 ):
         
     return surv_pols, surv_dfs, surv_inter
 
+
+def get_surv( df ):
+    ev = ( df['severity'] >= 3 ) .values
+    #ev = ( df['outcome']  ) .values
+    time = ( df['time2hosp']  ) .values
+    return ev, time, Surv.from_arrays(ev, time)
+
 if ( 'surv_pols' in globals()) ==False:
     surv_pols, _, surv_inter = split_ds( pol.DataFrame( decoded_df2 ) )
     time2event, surv_str, event_indicator= {},{},{}
