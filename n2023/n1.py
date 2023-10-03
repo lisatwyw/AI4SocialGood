@@ -7,6 +7,12 @@ import numpy as np
 import json 
 from pathlib import Path
 
+from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.exceptions import FitFailedWarning
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+
 def get_data( folder='../input/neiss-2023/' ):
     with Path( folder + "variable_mapping.json").open("r") as f:
         mapping = json.load(f, parse_int=True)
@@ -87,16 +93,15 @@ def get_data( folder='../input/neiss-2023/' ):
          
     return merged_df, org_columns, trn_case_nums, tst_case_nums, mapping
 
-if 1:
+
+
+
+
+if ('decoded_df2' in globals())==False:
     _, org_columns, trn_case_nums, tst_case_nums, mapping = get_data()
     #pol.DataFrame(merged_df).filter( pol.col('cpsc_case_number') == 200430360)
 
-
-%%time
-
-if ('decoded_df2' in globals())==False:
     decoded_df2=pd.read_csv('/kaggle/input/n-raw-extract-4/decoded_df2_unique.csv')
-
     #pol.DataFrame(merged_df)[:, 5].value_counts().tail()
 
     decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)
@@ -109,18 +114,10 @@ if ('decoded_df2' in globals())==False:
     for k in [ 'location','product_1','product_2','product_3','body_part','body_part_2' ]:
         dic[k] = {k: { i:l for l,i in enumerate( decoded_df2[k].unique() ) } }
         decoded_df2.replace( dic[k], inplace=True )
+  
+    O=2 # thresold on severity
+    att =['location','product_1','product_2','product_3','fire_involvement','body_part','drug','alcohol', 'sex', 'age_cate_binned','race_recoded','year','month']
 
-decoded_df2.shape 
-
-
-from sklearn.model_selection import GridSearchCV, KFold
-from sklearn.exceptions import FitFailedWarning
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-
-O=2 # thresold on severity
-
-att =['location','product_1','product_2','product_3','fire_involvement','body_part','drug','alcohol', 'sex', 'age_cate_binned','race_recoded','year','month']
 
 def split_ds( df2 ):
     df2 = df2.filter((pol.col('narrative').str.contains(' LAST ')|
