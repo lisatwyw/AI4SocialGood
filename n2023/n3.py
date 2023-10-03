@@ -24,3 +24,10 @@ import scipy
 from sksurv.metrics import *
 labels = ['3h','6h','9h','12h','15h','18h', '24h','2d','3d','1w','2w','1mo']
   
+time2event, surv_str, event_indicator= {},{},{}
+
+t='trn'; event_indicator[t], time2event[t], surv_str[t] = get_surv( surv_pols[t].to_pandas() )
+t='val'; event_indicator[t], time2event[t], surv_str[t] = get_surv( surv_pols[t].to_pandas() )
+t='tst'; event_indicator[t], time2event[t], surv_str[t] = get_surv( surv_pols[t].to_pandas() )
+
+surv_dfs_norm, scaler = get_cate_outcome( surv_pols )
