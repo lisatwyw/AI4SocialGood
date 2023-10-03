@@ -67,8 +67,6 @@ def run_xgb_optuna( emb, X, surv_inter ):
                     evals=[(ds['trn'], 'train'), (ds['val'], 'valid')],
                     early_stopping_rounds=50)
     
-    # Save trained model
-    bst.save_model(f'aft_best_model_{emb}.json')
     
     # Explore hyperparameter search space 
     #plt.figure()
@@ -89,6 +87,10 @@ def run_xgb_optuna( emb, X, surv_inter ):
             bs = brier_score( surv_str['trn'], surv_str[t], estimate=1/res[t].iloc[:,-1], times=[h] )
             print( end=f'{labels[d]}:{bs[1][0]:.3f} | ' )
 
+    # Save trained model
+    today = date.today()
+    bst.save_model(f'aft_model_{emb}_{today}.json')
+    
     return res
 
 t='trn'
