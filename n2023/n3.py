@@ -1,4 +1,4 @@
-install_packages(['pip install sksurv optuna'], package_dir= None )
+install_packages(['pip install sksurv optuna'], INTERACTIVE )
 
 import optuna
 import xgboost as xgb
