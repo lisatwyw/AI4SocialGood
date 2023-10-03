@@ -291,6 +291,7 @@ def split_ds( df2 ):
 
 
 def get_surv( df ):
+    from sksurv.util import Surv
     ev = ( df['severity'] >= 3 ) .values
     #ev = ( df['outcome']  ) .values
     time = ( df['time2hosp']  ) .values
