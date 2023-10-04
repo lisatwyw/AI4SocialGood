@@ -104,8 +104,8 @@ if ('decoded_df2' in globals())==False:
     decoded_df2=pd.read_csv('/kaggle/input/n-raw-extract-4/decoded_df2_unique.csv')
     #pol.DataFrame(merged_df)[:, 5].value_counts().tail()
 
-    decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)
-    pol.DataFrame(decoded_df2).filter( pol.col('cpsc_case_number') == 200430360)
+    #decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)
+    #pol.DataFrame(decoded_df2).filter( pol.col('cpsc_case_number') == 200430360)
 
     decoded_df2.sex = (decoded_df2.sex == 'MALE').astype(int)
     for k in [ 'alcohol','fire_involvement','drug', ]:
