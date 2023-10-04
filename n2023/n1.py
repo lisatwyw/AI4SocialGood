@@ -106,15 +106,12 @@ def load_decoded():
     dic = {}
     for k in [ 'location','product_1','product_2','product_3','body_part','body_part_2' ]:
         dic[k] = {k: { i:l for l,i in enumerate( decoded_df2[k].unique() ) } }
-        decoded_df2.replace( dic[k], inplace=True )
-  
-    O=2 # thresold on severity
-    att =['location','product_1','product_2','product_3','fire_involvement','body_part','drug','alcohol', 'sex', 'age_cate_binned','race_recoded','year','month']
-
+        decoded_df2.replace( dic[k], inplace=True )  
     return decoded_df2
 
 if ('decoded_df2' in globals())==False:
     _, org_columns, trn_case_nums, tst_case_nums, mapping = get_data()
     #pol.DataFrame(merged_df).filter( pol.col('cpsc_case_number') == 200430360)
     decoded_df2 = load_decoded()
-
+    
+att =['location','product_1','product_2','product_3','fire_involvement','body_part','drug','alcohol', 'sex', 'age_cate_binned','race_recoded','year','month']
