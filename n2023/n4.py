@@ -199,7 +199,7 @@ pos_ratio = 1-np.isinf( surv_inter['trn']['label_upper_bound'] ).sum() / surv_in
 print( 'pos-neg-ratio:', pos_ratio,  )
 
 for mid in ['xgb',]:
-    for emb in EMB:        
+    for emb in [19,20]+EMB:        
     #for emb in [19,20,1,2,3,4,]:        
         X,res ={},{}    
         for t in [ 'trn','val','tst']:
@@ -213,7 +213,7 @@ for mid in ['xgb',]:
                 else:
                     X[t] = Embeddings[emb,t].to_numpy()            
                 if emb == 20:
-                    X[t] = np.hstack( (X[t], surv_dfs_norm[t][att] ) )
+                    X[t] = np.hstack( (X[t], surv_pols[t][att].to_pandas()  ) )
 
         if mid == 'xgb':
             res = run_xgb_optuna( emb, X, surv_inter)            
