@@ -62,9 +62,19 @@ def get_data( folder='../input/neiss-2023/' ):
         k = 'race_white'
         df2[k] = 0 # non-white 
         q=np.where( df2['race'] == 0 )[0]
-        df2.loc[ q, k] = np.nan 
+        df2.loc[ q, k] = -1 # not stated 
         q=np.where( df2['race'] == 1 )[0]
-        df2.loc[ q, k] = 1         
+        df2.loc[ q, k] = 1   
+
+        k = 'race_4'
+        df2[k] = 0 # non-white 
+        q=np.where( df2['race'] == 0 )[0]
+        df2.loc[ q, k] = -1
+        q=np.where( df2['race'] == 4 )[0]
+        df2.loc[ q, k] = -2
+        q=np.where( df2['race'] == 1 )[0]
+        df2.loc[ q, k] = 1   
+        
         
         df2['race_recoded'] = 0
         df2['race_recoded'] = df2['race'].copy()
