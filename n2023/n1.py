@@ -93,15 +93,8 @@ def get_data( folder='../input/neiss-2023/' ):
          
     return merged_df, org_columns, trn_case_nums, tst_case_nums, mapping
 
-
-
-
-
-if ('decoded_df2' in globals())==False:
-    _, org_columns, trn_case_nums, tst_case_nums, mapping = get_data()
-    #pol.DataFrame(merged_df).filter( pol.col('cpsc_case_number') == 200430360)
-
-    decoded_df2=pd.read_csv('/kaggle/input/n-raw-extract-4/decoded_df2_unique.csv')
+def load_decoded():    
+    decoded_df2=pd.read_csv('../input/n-raw-extract-4/decoded_df2_unique.csv')
     #pol.DataFrame(merged_df)[:, 5].value_counts().tail()
 
     #decoded_df2=decoded_df2.drop_duplicates('cpsc_case_number',)
@@ -118,4 +111,10 @@ if ('decoded_df2' in globals())==False:
     O=2 # thresold on severity
     att =['location','product_1','product_2','product_3','fire_involvement','body_part','drug','alcohol', 'sex', 'age_cate_binned','race_recoded','year','month']
 
+    return decoded_df2
+
+if ('decoded_df2' in globals())==False:
+    _, org_columns, trn_case_nums, tst_case_nums, mapping = get_data()
+    #pol.DataFrame(merged_df).filter( pol.col('cpsc_case_number') == 200430360)
+    decoded_df2 = load_decoded()
 
