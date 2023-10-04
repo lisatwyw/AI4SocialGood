@@ -275,19 +275,7 @@ def split_ds( df2 ):
     surv_pols['val'] = trn_df[1::2,:]
     surv_pols['tst'] = tst_df
         
-    surv_dfs = {}
-    for t in ['trn','val', 'tst']:
-        surv_dfs[t] = surv_pols[t].to_pandas()
-    
-    surv_inter={}
-    for t in ['trn','val','tst']:
-        surv_inter[t]={}
-        surv_inter[t]=pd.DataFrame( {'label_lower_bound': surv_dfs[t]['time2hosp'] ,
-                                     'label_upper_bound': surv_dfs[t]['time2hosp'] } )
-        q=np.where(  surv_dfs[t]['severity'] <= O )[0] # unseen + observed
-        surv_inter[t].iloc[q, 1] = np.inf 
-        
-    return surv_pols, surv_dfs, surv_inter
+    return surv_pols
 
 
 def get_surv( df ):
@@ -312,7 +300,7 @@ def get_cate_outcome( S ):
 
 
 if ( 'surv_pols' in globals()) ==False:
-    surv_pols, _, surv_inter = split_ds( pol.DataFrame( decoded_df2 ) )
+    surv_pols = split_ds( pol.DataFrame( decoded_df2 ) )
     time2event, surv_str, event_indicator= {},{},{}
     
     t='trn'; event_indicator[t], time2event[t], surv_str[t] = get_surv( surv_pols[t].to_pandas() )
