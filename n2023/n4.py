@@ -199,21 +199,25 @@ pos_ratio = 1-np.isinf( surv_inter['trn']['label_upper_bound'] ).sum() / surv_in
 print( 'pos-neg-ratio:', pos_ratio,  )
 
 for mid in ['xgb',]:
-    for emb in [19,20]+EMB:        
-    #for emb in [19,20,1,2,3,4,]:        
+    for emb in [21,22,23,24,25,19,20]+EMB:            
         X,res ={},{}    
         for t in [ 'trn','val','tst']:
             if t=='samp':
                 ds[t] = xgb.DMatrix(Embeddings[emb, 'val'].iloc[::10,:].to_numpy() )
                 ds[t].set_float_info('label_lower_bound', surv_inter['val']['label_lower_bound'][::10] )
                 ds[t].set_float_info('label_upper_bound', surv_inter['val']['label_upper_bound'][::10] )
-            else:            
+            else:   
                 if emb>=19:
                     X[t] = np.hstack( (Embeddings[1,t],Embeddings[2,t],Embeddings[3,t], Embeddings[4,t] ) )                 
                 else:
-                    X[t] = Embeddings[emb,t].to_numpy()            
+                    X[t] = Embeddings[emb,t].to_numpy()                                
                 if emb == 20:
                     X[t] = np.hstack( (X[t], surv_pols[t][att].to_pandas()  ) )
+                elif emb== 25:                    
+                    X[t] = np.hstack( (word_reduced[1,t],word_reduced[2,t],word_reduced[3,t],word_reduced[4,t], surv_pols[t][att].to_pandas()  ) )
+                elif emb>= 21:
+                    mid = emb - 20
+                    X[t] = np.hstack( (word_reduced[mid,t], surv_pols[t][att].to_pandas()  ) )
 
         if mid == 'xgb':
             res = run_xgb_optuna( emb, X, surv_inter)            
