@@ -216,8 +216,8 @@ for mid in ['xgb',]:
                 elif emb== 25:                    
                     X[t] = np.hstack( (word_reduced[1,t],word_reduced[2,t],word_reduced[3,t],word_reduced[4,t], surv_pols[t][att].to_pandas()  ) )
                 elif emb>= 21:
-                    mid = emb - 20
-                    X[t] = np.hstack( (word_reduced[mid,t], surv_pols[t][att].to_pandas()  ) )
+                    rr = emb - 20
+                    X[t] = np.hstack( (word_reduced[rr,t], surv_pols[t][att].to_pandas()  ) )
 
         if mid == 'xgb':
             res = run_xgb_optuna( emb, X, surv_inter)            
