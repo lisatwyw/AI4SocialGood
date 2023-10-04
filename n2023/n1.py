@@ -124,6 +124,29 @@ def load_decoded():
     for k in [ 'location','product_1','product_2','product_3','body_part','body_part_2' ]:
         dic[k] = {k: { i:l for l,i in enumerate( decoded_df2[k].unique() ) } }
         decoded_df2.replace( dic[k], inplace=True )  
+
+    def add_race_categories( df2 ):
+        k = 'race_white'
+        df2[k] = 0 # non-white 
+        q=np.where( df2['race'] == 0 )[0]
+        df2.loc[ q, k] = -1 # not stated 
+        q=np.where( df2['race'] == 1 )[0]
+        df2.loc[ q, k] = 1   
+
+        k = 'race_4'
+        df2[k] = 0 # non-white 
+        q=np.where( df2['race'] == 0 )[0]
+        df2.loc[ q, k] = -1
+        q=np.where( df2['race'] == 4 )[0]
+        df2.loc[ q, k] = -2
+        q=np.where( df2['race'] == 1 )[0]
+        df2.loc[ q, k] = 1   
+        return df2
+        
+    decoded_df2 = add_race_categories(decoded_df2 )
+
+    decoded_df2['race_white']; #check 
+
     return decoded_df2
 
 if ('decoded_df2' in globals())==False:
