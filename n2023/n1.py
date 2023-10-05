@@ -126,26 +126,25 @@ def load_decoded():
         decoded_df2.replace( dic[k], inplace=True )  
 
     def add_race_categories( df2 ):
+        df2.reset_index(inplace=True)
         k = 'race_white'
         df2[k] = 0 # non-white 
-        q=np.where( df2['race'] == 0 )[0]
+        q=np.where( df2['race'] == 'N.S.' )[0]
         df2.loc[ q, k] = -1 # not stated 
-        q=np.where( df2['race'] == 1 )[0]
+        q=np.where( df2['race'] == 'WHITE' )[0]
         df2.loc[ q, k] = 1   
-
+    
         k = 'race_4'
         df2[k] = 0 # non-white 
-        q=np.where( df2['race'] == 0 )[0]
+        q=np.where( df2['race'] == 'N.S.' )[0]; print(len(q))    
         df2.loc[ q, k] = -1
-        q=np.where( df2['race'] == 4 )[0]
+        q=np.where( df2['race'] == 'ASIAN' )[0]; print(len(q))
         df2.loc[ q, k] = -2
-        q=np.where( df2['race'] == 1 )[0]
+        q=np.where( df2['race'] == 'WHITE' )[0]; print(len(q))
         df2.loc[ q, k] = 1   
         return df2
-        
     decoded_df2 = add_race_categories(decoded_df2 )
-
-    decoded_df2['race_white']; #check 
+    print( 'race=white?', decoded_df2['race_white'].unique() ) #check 
 
     return decoded_df2
 
