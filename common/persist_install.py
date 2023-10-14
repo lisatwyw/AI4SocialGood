@@ -34,7 +34,7 @@ import multiprocessing as mp
 ncpus = mp.cpu_count()
 package_dir = '/kaggle/working/mypackages' 
 
-def add_path():  
+def add_path( package_dir = '/kaggle/working/mypackages' ):  
   sys.path.append( package_dir )    
   
 def install_packages( cmds, INTERACTIVE=False, package_dir=None ):
