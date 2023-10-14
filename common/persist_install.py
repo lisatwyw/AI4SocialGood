@@ -32,14 +32,18 @@ gpus = tf.config.list_physical_devices('GPU');
 
 import multiprocessing as mp
 ncpus = mp.cpu_count()
+package_dir = '/kaggle/working/mypackages' 
 
-def install_packages( cmds, INTERACTIVE=False ):
+def add_path():  
+  sys.path.append( package_dir )    
+  
+def install_packages( cmds, INTERACTIVE=False, package_dir=None ):
     if INTERACTIVE:
         package_dir = '/kaggle/working/mypackages' 
     else:
         package_dir = None 
     if package_dir is not None:
-        sys.path.append( package_dir )    
+        add_path( package_dir )    
     if gpus:    
         try:
             # Currently, memory growth needs to be the same across GPUs
