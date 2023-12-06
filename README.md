@@ -1,4 +1,4 @@
-# AI4SocialGood
+# CS4S 
 
 1. Humanity issues
    - AI in human trafficking         /6
