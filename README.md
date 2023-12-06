@@ -1,4 +1,4 @@
-# CS4S 
+# CS4S (Computer Science for Society)
 
 1. Humanity issues
    - AI in human trafficking         /6
