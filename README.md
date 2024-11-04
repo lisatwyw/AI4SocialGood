@@ -15,5 +15,5 @@
    - Age regression using meth-data  /8-9
    - Indigenous Peoples              /8
    - Climate changes & elders        /9
-   - [Drug and health technology landscape](DrugAgency/readme.md)  
+   - [Drug and health technology landscape](DrugAgency)  
   
