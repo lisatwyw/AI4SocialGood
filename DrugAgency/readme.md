@@ -41,3 +41,20 @@ GPT-4 Response: 20 year old female patient with a history of anorexia nervosa an
 Please read the above medical note and verify that each claim is exactly contained in the patient’s facts. Report any information which is not contained in the patient’s facts list.
 
 ```
+
+
+# Biases when race variable included
+```
+Decreased trust: Errors can erode trust among racialized communities, hindering healthcare engagement.
+Regulatory non-compliance: Failure to accurately account for race may lead to non-compliance with regulatory requirements.
+```
+
+# Erroneous use examples of sex vs gender
+
+```
+Assuming binary gender: A model predicting cardiovascular disease risk used only male/female categories, excluding non-binary individuals.
+Conflating sex and gender: A predictive model for osteoporosis risk used "female" as a proxy for biological sex, ignoring gender identity.
+Overlooking intersectionality: A model analyzing mental health outcomes failed to account for intersections between gender, race, and socioeconomic status.
+Ignoring gender fluidity: A longitudinal study modeled gender as a fixed variable, neglecting changes in gender identity over time.
+```
+
