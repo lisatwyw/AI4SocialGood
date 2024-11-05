@@ -58,3 +58,36 @@ Overlooking intersectionality: A model analyzing mental health outcomes failed t
 Ignoring gender fluidity: A longitudinal study modeled gender as a fixed variable, neglecting changes in gender identity over time.
 ```
 
+# Example: Analysis of Adverse Event Reports
+
+```
+Objective: Identify factors associated with adverse events (AEs) related to a new diabetes medication.
+
+Dataset: 10,000 AE reports from various sources, including electronic health records and patient surveys.
+
+LLM Model: Trained on dataset to predict AE risk factors.
+
+Initial Findings:
+Age: Older adults (>65) were more likely to experience AEs.
+Sex: Females were more likely to report AEs.
+Limitations: Model failed to account for intersectionality.
+
+Consequences:
+Oversimplification: Results implied that all older adults and females are at higher risk, ignoring variations within these groups.
+Masked disparities: Analysis obscured differences in AE risk among:
+- Indigenous females with diabetes and kidney disease.
+- Low-income, racialized males with limited healthcare access.
+- LGBTQ2+ individuals with mental health comorbidities.
+
+Updated Model: Incorporated intersectional variables:
+- Indigenous identity
+- Racialized identity
+- Socioeconomic status
+- LGBTQ2+ identity
+
+Comorbidities (e.g., kidney disease, mental health)
+
+```
+
+
+
